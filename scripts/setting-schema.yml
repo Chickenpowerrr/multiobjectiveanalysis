@@ -1,0 +1,74 @@
+type: object
+required: [tools, analysis]
+additionalProperties: false
+properties:
+  tools:
+    description: The supported tools
+    type: object
+    required: [storm, prism]
+    additionalProperties: false
+    properties:
+      storm:
+        description: The settings for the Storm model checker
+        type: object
+        required: [path]
+        additionalProperties: false
+        properties:
+          path:
+            description: The path to the Storm model checker
+            type: string
+      prism:
+        description: The settings for the PRISM model checker
+        type: object
+        required: [path]
+        additionalProperties: false
+        properties:
+          path:
+            description: The path to the PRISM model checker
+            type: string
+  analysis:
+    description: The settings for the experiments
+    type: object
+    required: [valueiteration, approximation]
+    additionalProperties: false
+    properties:
+      valueiteration:
+        description: The settings for value iteration experiments
+        type: object
+        required: [epsilon]
+        additionalProperties: false
+        properties:
+          epsilon:
+            type: object
+            required: [min, max, step]
+            additionalProperties: false
+            properties:
+              min:
+                description: The smallest epsilon value that will be used, inclusive
+                type: number
+                minimum: 0
+                maximum: 1
+              max:
+                description: The largest epsilon value that will be used, inclusive
+                type: number
+                minimum: 0
+                maximum: 1
+              step:
+                description: The size of the steps to be taken in the epsilon
+                type: number
+                exclusiveMinimum: 0
+                maximum: 1
+      approximation:
+        description: The settings when approximating a numerical query by using achievability queries
+        type: object
+        required: [infinity, precision]
+        additionalProperties: false
+        properties:
+          infinity:
+            description: The largest reward that will be used when approximating a numerical query, a higher reward will be considered as infinite
+            type: number
+            minimum: 0
+          precision:
+            description: The maximum difference between the actual value and the calculated value
+            type: number
+            minimumExclusive: 0

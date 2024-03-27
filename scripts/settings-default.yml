@@ -1,0 +1,15 @@
+tools:
+  storm:
+    path: ~/bin/storm/bin/storm
+  prism:
+    path: ~/bin/prism/bin/prism
+
+analysis:
+  valueiteration:
+    epsilon:
+      min: 0
+      max: 0.1
+      step: 0.001
+  approximation:
+    infinity: 100000
+    precision: 0.001
