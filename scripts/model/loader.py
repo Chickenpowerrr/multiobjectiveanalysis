@@ -16,8 +16,13 @@ def load_models():
         constants_file = os.path.join(model_dir, 'constants.txt')
 
         for pi, property in enumerate(parse_properties(properties_file)):
-            for ci, constants in enumerate(parse_constants(constants_file)):
+            constants = parse_constants(constants_file)
+            if len(constants) == 0:
+                models.append(Model(f'{model_dir_name}-{pi}-0', model_file, property, {}))
+                continue
+            for ci, constants in enumerate(constants):
                 models.append(Model(f'{model_dir_name}-{pi}-{ci}', model_file, property, constants))
+
     return models
 
 

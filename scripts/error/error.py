@@ -7,3 +7,15 @@ class ModelError(ABC, Exception):
 
 class NoFiniteRewardError(ModelError):
     pass
+
+
+class StepboundUnsupported(ModelError):
+    pass
+
+
+class ConvergeError(ModelError):
+    pass
+
+
+class OnlyCumulativeSupported(ModelError):
+    pass

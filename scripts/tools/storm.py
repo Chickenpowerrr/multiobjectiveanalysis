@@ -28,28 +28,28 @@ class Storm(Tool):
         raise ValueError(f"Unsupported method: {method}")
 
     def _vi_solve(self, model: Model, epsilon: float) -> bool | Optional[float]:
-        result = subprocess.run([self._path,
-                                 "--prism", model.file(),
-                                 "-const", ",".join(f"{name}={value}" for name, value in model.constants().items()),
+        arguments = [self._path, "--prism", model.file(),
                                  "-prop", model.property(),
-                                 "--multiobjective:precision", str(epsilon), "reldiff",
-                                 "--multiobjective:method", "pcaa"],
-                                stdout=subprocess.PIPE, text=True)
+                                 "-eps", str(epsilon), "--absolute",
+                                 "--multiobjective:precision", str(epsilon), "abs",
+                                 "--multiobjective:method", "pcaa"]
+        if len(model.constants()) > 0:
+            arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True)
         return self._parse_result(result.stdout)
 
     def _parse_result(self, message: str) -> bool | Optional[float]:
         value = re.search('Result \\(for initial states\\): (.+?)\n', message)
-        if (value is None
-                and 'There is no Pareto optimal scheduler that yields finite reward for all objectives' in message):
-            raise NoFiniteRewardError()
         if value is None:
+            if 'There is no Pareto optimal scheduler that yields finite reward for all objectives' in message:
+                raise NoFiniteRewardError()
             raise Exception(message)
 
         try:
             return float(value.group(1))
         except ValueError:
-            if value == 'true':
+            if value.group(1) == 'true':
                 return True
-            if value == 'false':
+            if value.group(1) == 'false':
                 return False
             raise ValueError(message)

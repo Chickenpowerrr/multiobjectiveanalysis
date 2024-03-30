@@ -1,0 +1,4 @@
+multi(Pmax=? [ F task1_completed ], R{"w_1_total"}>=(0.95*0.9795918367346945) [ F true ])
+multi(Pmax=? [ F task1_completed ], R{"w_1_total"}>=(0.95*0.9795918367346945) [ F true ], P>=0.5 [ F task2_completed ])
+multi(R{"w_1_total"}max=? [ F true ], R{"w_2_total"}>=(0.95*0.7142857142857146) [ F true ])
+multi(R{"w_2_total"}max=? [ F true ], R{"w_1_total"}>=(0.95*0.9795918367346945) [ F true ])

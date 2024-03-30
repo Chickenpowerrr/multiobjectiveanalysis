@@ -39,16 +39,17 @@ def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dic
                        approx_infinity: float, approx_precision: float) -> float:
     logger.start_approximation(tool, method, model)
 
+    low = 0
+    high = 1 if model.probability() else approx_infinity
+
     maximize = model.maximize()
-    bound_model = model.set_value(0 if maximize else approx_infinity)
+    bound_model = model.set_value(0 if maximize else high)
     bound_result = tool.solve(method, bound_model, parameters)
 
     if not bound_result:
         return math.inf if maximize else 0
 
-    iterations = math.ceil(math.log2(approx_infinity / approx_precision))
-    low = 0
-    high = approx_infinity
+    iterations = math.ceil(math.log2((high - low) / approx_precision))
 
     for iteration in range(iterations):
         logger.start_approximation_iteration(iteration + 1, iterations)

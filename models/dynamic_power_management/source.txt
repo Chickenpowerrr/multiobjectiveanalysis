@@ -1,0 +1,3 @@
+https://www.prismmodelchecker.org/files/atva12mo/
+
+k = 100, Q = 1

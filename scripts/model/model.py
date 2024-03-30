@@ -25,6 +25,9 @@ class Model:
     def maximize(self):
         return 'max=?' in self._property
 
+    def probability(self):
+        return 'Pmax' in self._property or 'Pmin' in self._property
+
     def set_value(self, value: float):
         property = self._property.replace('max=?', f'>={value}').replace('min=?', f'<={value}')
         return Model(f'{self._name}-{value:.5f}', self._file, property, self._constants)

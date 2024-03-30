@@ -12,4 +12,4 @@ analysis:
       step: 0.001
   approximation:
     infinity: 100000
-    precision: 0.001
+    precision: 0.0001
