@@ -46,8 +46,8 @@ def run_experiments(models, tools, settings):
 
     for model in models:
         for tool in tools:
-            try:
-                for method in tool.supported_methods():
+            for method in tool.supported_methods():
+                try:
                     if method == Method.ValueIteration:
                         epsilons, approx_results, query_results = (
                             analysis.run_value_iteration_analysis(tool, model, approx_infinity, approx_precision,
@@ -57,8 +57,8 @@ def run_experiments(models, tools, settings):
                         approx_result, query_result = (
                             analysis.run_linear_programming_analysis(tool, model, approx_infinity, approx_precision))
                         logger.handle_linear_program_result(tool, model, approx_result, query_result)
-            except ModelError:
-                logger.invalid_model(tool, model)
+                except ModelError:
+                    logger.invalid_model(tool, model)
 
 
 if __name__ == '__main__':

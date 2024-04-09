@@ -2,7 +2,8 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from scripts.error.error import NoFiniteRewardError, StepboundUnsupported, ConvergeError, OnlyCumulativeSupported
+from scripts.error.error import NoFiniteRewardError, StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, \
+    StateRewardUnsupported
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method
 
@@ -55,6 +56,8 @@ class Prism(Tool):
                 raise ConvergeError()
             if 'Only the C and C>=k reward operators are currently supported for multi-objective properties' in message:
                 raise OnlyCumulativeSupported()
+            if 'Multi-objective model checking does not support state rewards; please convert to transition rewards' in message:
+                raise StateRewardUnsupported()
             raise Exception(message)
 
         try:

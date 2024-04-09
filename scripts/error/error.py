@@ -19,3 +19,7 @@ class ConvergeError(ModelError):
 
 class OnlyCumulativeSupported(ModelError):
     pass
+
+
+class StateRewardUnsupported(ModelError):
+    pass
