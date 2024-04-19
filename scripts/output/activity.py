@@ -33,7 +33,7 @@ class ActivityHandler(ABC):
     def invalid_model(self, tool: Tool, model: Model):
         pass
 
-    def handle_value_iteration_result(self, tool: Tool, model: Model,
+    def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
                                       epsilons: List[float], approx_results: List[float], query_results: List[float]):
         pass
 
@@ -85,10 +85,11 @@ class SubscribableActivityHandler(ActivityHandler):
         for activity_handler in self._activity_handlers:
             activity_handler.invalid_model(tool, model)
 
-    def handle_value_iteration_result(self, tool: Tool, model: Model,
+    def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
                                       epsilons: List[float], approx_results: List[float], query_results: List[float]):
         for activity_handler in self._activity_handlers:
-            activity_handler.handle_value_iteration_result(tool, model, epsilons, approx_results, query_results)
+            activity_handler.handle_value_iteration_result(tool, model, absolute_epsilon,
+                                                           epsilons, approx_results, query_results)
 
     def handle_linear_program_result(self, tool: Tool, model: Model, approx_result: float, query_result: float):
         for activity_handler in self._activity_handlers:

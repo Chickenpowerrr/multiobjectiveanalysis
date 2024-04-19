@@ -12,7 +12,7 @@ from scripts.output.progress import ProgressActivityHandler
 from scripts.output.writer import ResultActivityHandler
 from scripts.tools.prism import Prism
 from scripts.tools.storm import Storm
-from scripts.tools.tool import Tool, Method
+from scripts.tools.tool import Tool, Method, Setting
 
 SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism}
 
@@ -49,10 +49,17 @@ def run_experiments(models, tools, settings):
             for method in tool.supported_methods():
                 try:
                     if method == Method.ValueIteration:
-                        epsilons, approx_results, query_results = (
-                            analysis.run_value_iteration_analysis(tool, model, approx_infinity, approx_precision,
-                                                                  min_epsilon, max_epsilon, epsilon_step))
-                        logger.handle_value_iteration_result(tool, model, epsilons, approx_results, query_results)
+                        epsilon_settings = []
+                        epsilon_settings += [True] if Setting.AbsoluteEpsilon in tool.supported_settings() else []
+                        epsilon_settings += [False] if Setting.RelativeEpsilon in tool.supported_settings() else []
+
+                        for epsilon_setting in epsilon_settings:
+                            epsilons, approx_results, query_results = (
+                                analysis.run_value_iteration_analysis(tool, model, approx_infinity, approx_precision,
+                                                                      min_epsilon, max_epsilon, epsilon_step,
+                                                                      epsilon_setting))
+                            logger.handle_value_iteration_result(tool, model, epsilon_setting,
+                                                                 epsilons, approx_results, query_results)
                     if method == Method.LinearProgramming:
                         approx_result, query_result = (
                             analysis.run_linear_programming_analysis(tool, model, approx_infinity, approx_precision))

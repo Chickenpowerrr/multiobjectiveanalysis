@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 from scripts.error.error import NoFiniteRewardError, StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, \
     StateRewardUnsupported
 from scripts.model.model import Model
-from scripts.tools.tool import Tool, Method
+from scripts.tools.tool import Tool, Method, Setting
 
 
 class Prism(Tool):
@@ -22,15 +22,15 @@ class Prism(Tool):
 
     def solve(self, method: Method, model: Model, parameters: Dict) -> bool | Optional[float]:
         if method == Method.ValueIteration:
-            return self._vi_solve(model, parameters['epsilon'])
+            return self._vi_solve(model, parameters['epsilon'], parameters['absoluteEpsilon'])
         if method == Method.LinearProgramming:
             return self._lp_solve(model)
         raise ValueError(f"Unsupported method: {method}")
 
-    def _vi_solve(self, model: Model, epsilon: float) -> bool | Optional[float]:
+    def _vi_solve(self, model: Model, epsilon: float, absolute_epsilon: bool) -> bool | Optional[float]:
         arguments = [self._path, model.file(),
                      "-pf", model.property(),
-                     "-epsilon", str(epsilon), "-abs",
+                     "-epsilon", str(epsilon), "-abs" if absolute_epsilon else "-rel",
                      "-paretoepsilon", str(epsilon),
                      "-maxiters", "100000"]
         if len(arguments) > 0:
@@ -71,3 +71,6 @@ class Prism(Tool):
 
     def supported_methods(self) -> List[Method]:
         return [Method.ValueIteration, Method.LinearProgramming]
+
+    def supported_settings(self) -> List[Setting]:
+        return [Setting.AbsoluteEpsilon, Setting.RelativeEpsilon]

@@ -18,9 +18,10 @@ class ResultActivityHandler(ActivityHandler):
             with open(os.path.join(self._path, 'settings.yml'), 'w') as settings:
                 settings.write(''.join(default.readlines()))
 
-    def handle_value_iteration_result(self, tool: Tool, model: Model, epsilons: List[float],
+    def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool, epsilons: List[float],
                                       approx_results: List[float], query_results: List[float]):
-        path = os.path.join(self._path, f'{model.name()}-vi-{tool.__class__.__name__}.dat')
+        path = os.path.join(self._path, f'{model.name()}-vi-{"abs" if absolute_epsilon else "rel"}'
+                                        f'-{tool.__class__.__name__}.dat')
         with open(path, 'w') as file:
             file.write('epsilon approx query\n')
             for row in zip(epsilons, approx_results, query_results):

@@ -10,6 +10,11 @@ class Method(Enum):
     LinearProgramming = 1
 
 
+class Setting(Enum):
+    RelativeEpsilon = 0
+    AbsoluteEpsilon = 1
+
+
 class Tool(ABC):
 
     @abstractmethod
@@ -22,4 +27,8 @@ class Tool(ABC):
 
     @abstractmethod
     def supported_methods(self) -> List[Method]:
+        pass
+
+    @abstractmethod
+    def supported_settings(self) -> List[Setting]:
         pass

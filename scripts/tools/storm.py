@@ -4,7 +4,7 @@ from typing import Dict, Optional, List
 
 from scripts.error.error import NoFiniteRewardError, StepboundUnsupported
 from scripts.model.model import Model
-from scripts.tools.tool import Tool, Method
+from scripts.tools.tool import Tool, Method, Setting
 
 
 class Storm(Tool):
@@ -21,6 +21,9 @@ class Storm(Tool):
 
     def supported_methods(self) -> List[Method]:
         return [Method.ValueIteration, Method.LinearProgramming]
+
+    def supported_settings(self) -> List[Setting]:
+        return [Setting.AbsoluteEpsilon]
 
     def solve(self, method: Method, model: Model, parameters: Dict) -> bool | Optional[float]:
         if method == Method.ValueIteration:

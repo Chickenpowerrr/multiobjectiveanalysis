@@ -10,7 +10,7 @@ from scripts.tools.tool import Tool, Method
 
 def run_value_iteration_analysis(tool: Tool, model: Model,
                                  approx_infinity: float, approx_precision: float,
-                                 min_epsilon: float, max_epsilon: float, epsilon_step: float) \
+                                 min_epsilon: float, max_epsilon: float, epsilon_step: float, absolute_epsilon: bool) \
         -> Tuple[List[float], List[float], List[float]]:
     logger.start_value_iteration(tool, model)
     approx_results = []
@@ -18,10 +18,11 @@ def run_value_iteration_analysis(tool: Tool, model: Model,
     epsilons = list(np.arange(max_epsilon, min_epsilon, -epsilon_step))
     for epsilon in epsilons:
         logger.start_value_iteration_epsilon(epsilon)
-        approx_result = _run_approximation(tool, Method.ValueIteration, model, {'epsilon': epsilon},
+        parameters = {'epsilon': epsilon, 'absoluteEpsilon': absolute_epsilon}
+        approx_result = _run_approximation(tool, Method.ValueIteration, model, parameters,
                                            approx_infinity, approx_precision)
         approx_results.append(approx_result)
-        query_result = _run_query(tool, Method.ValueIteration, model, {'epsilon': epsilon})
+        query_result = _run_query(tool, Method.ValueIteration, model, parameters)
         query_results.append(query_result)
     return epsilons, approx_results, query_results
 
@@ -43,10 +44,10 @@ def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dic
     high = 1 if model.probability() else approx_infinity
 
     maximize = model.maximize()
-    bound_model = model.set_value(0 if maximize else high)
+    bound_model = model.set_value(high if maximize else 0)
     bound_result = tool.solve(method, bound_model, parameters)
 
-    if not bound_result:
+    if bound_result:
         return math.inf if maximize else 0
 
     iterations = math.ceil(math.log2((high - low) / approx_precision))
