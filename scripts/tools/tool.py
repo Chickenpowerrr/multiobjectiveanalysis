@@ -22,7 +22,7 @@ class Tool(ABC):
         pass
 
     @abstractmethod
-    def solve(self, method: Method, model: Model, parameters: Dict) -> bool | Optional[float]:
+    def solve(self, method: Method, model: Model, timeout: int, parameters: Dict) -> bool | Optional[float]:
         pass
 
     @abstractmethod

@@ -8,7 +8,7 @@ from scripts.output.activity import logger
 from scripts.tools.tool import Tool, Method
 
 
-def run_value_iteration_analysis(tool: Tool, model: Model,
+def run_value_iteration_analysis(tool: Tool, model: Model, timeout: int,
                                  approx_infinity: float, approx_precision: float,
                                  min_epsilon: float, max_epsilon: float, epsilon_step: float, absolute_epsilon: bool) \
         -> Tuple[List[float], List[float], List[float]]:
@@ -19,24 +19,25 @@ def run_value_iteration_analysis(tool: Tool, model: Model,
     for epsilon in epsilons:
         logger.start_value_iteration_epsilon(epsilon)
         parameters = {'epsilon': epsilon, 'absoluteEpsilon': absolute_epsilon}
-        approx_result = _run_approximation(tool, Method.ValueIteration, model, parameters,
+        approx_result = _run_approximation(tool, Method.ValueIteration, model, timeout, parameters,
                                            approx_infinity, approx_precision)
         approx_results.append(approx_result)
-        query_result = _run_query(tool, Method.ValueIteration, model, parameters)
+        query_result = _run_query(tool, Method.ValueIteration, model, timeout, parameters)
         query_results.append(query_result)
     return epsilons, approx_results, query_results
 
 
-def run_linear_programming_analysis(tool: Tool, model: Model, approx_infinite: float, approx_precision: float) \
-        -> Tuple[float, float]:
+def run_linear_programming_analysis(tool: Tool, model: Model, timeout: int,
+                                    approx_infinite: float, approx_precision: float) -> Tuple[float, float]:
     logger.start_linear_programming(tool, model)
-    approx_result = _run_approximation(tool, Method.LinearProgramming, model, {}, approx_infinite, approx_precision)
-    query_result = _run_query(tool, Method.LinearProgramming, model, {})
+    approx_result = _run_approximation(tool, Method.LinearProgramming, model, timeout, {},
+                                       approx_infinite, approx_precision)
+    query_result = _run_query(tool, Method.LinearProgramming, model, timeout, {})
 
     return approx_result, query_result
 
 
-def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dict,
+def _run_approximation(tool: Tool, method: Method, model: Model, timeout: int, parameters: Dict,
                        approx_infinity: float, approx_precision: float) -> float:
     logger.start_approximation(tool, method, model)
 
@@ -44,11 +45,11 @@ def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dic
     high = 1 if model.probability() else approx_infinity
 
     maximize = model.maximize()
-    bound_model = model.set_value(high if maximize else 0)
-    bound_result = tool.solve(method, bound_model, parameters)
-
-    if bound_result:
-        return math.inf if maximize else 0
+    # bound_model = model.set_value(high if maximize else 0)
+    # bound_result = tool.solve(method, bound_model, parameters)
+    #
+    # if bound_result:
+    #     return math.inf if maximize else 0
 
     iterations = math.ceil(math.log2((high - low) / approx_precision))
 
@@ -56,7 +57,7 @@ def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dic
         logger.start_approximation_iteration(iteration + 1, iterations)
         current_target = (high + low) / 2
         current_model = model.set_value(current_target)
-        current_result = tool.solve(method, current_model, parameters)
+        current_result = tool.solve(method, current_model, timeout, parameters)
 
         if current_result == maximize:
             low = current_target
@@ -65,6 +66,6 @@ def _run_approximation(tool: Tool, method: Method, model: Model, parameters: Dic
     return (high + low) / 2
 
 
-def _run_query(tool: Tool, method: Method, model: Model, parameters: Dict) -> float:
+def _run_query(tool: Tool, method: Method, model: Model, timeout: int, parameters: Dict) -> float:
     logger.start_query(tool, method, model)
-    return tool.solve(method, model, parameters)
+    return tool.solve(method, model, timeout, parameters)

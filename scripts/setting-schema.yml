@@ -5,7 +5,7 @@ properties:
   tools:
     description: The supported tools
     type: object
-    required: [storm, prism]
+    required: [storm, prism, epmc]
     additionalProperties: false
     properties:
       storm:
@@ -26,12 +26,31 @@ properties:
           path:
             description: The path to the PRISM model checker
             type: string
+      epmc:
+        description: The settings for the ePMC model checker
+        type: object
+        required: [path, java]
+        additionalProperties: false
+        properties:
+          path:
+            description: The path to jar for the ePMC model checker
+            type: string
+          java:
+            description: The path to java
+            type: string
+          spot:
+            description: The path to the spot platform
+            type: string
   analysis:
     description: The settings for the experiments
     type: object
-    required: [valueiteration, approximation]
+    required: [timeout, valueiteration, approximation]
     additionalProperties: false
     properties:
+      timeout:
+        description: The maximum time in seconds that one query can take
+        type: number
+        minimum: 0
       valueiteration:
         description: The settings for value iteration experiments
         type: object

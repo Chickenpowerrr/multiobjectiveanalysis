@@ -25,14 +25,14 @@ class Storm(Tool):
     def supported_settings(self) -> List[Setting]:
         return [Setting.AbsoluteEpsilon]
 
-    def solve(self, method: Method, model: Model, parameters: Dict) -> bool | Optional[float]:
+    def solve(self, method: Method, model: Model, timeout: int, parameters: Dict) -> bool | Optional[float]:
         if method == Method.ValueIteration:
-            return self._vi_solve(model, parameters['epsilon'])
+            return self._vi_solve(model, timeout, parameters['epsilon'])
         if method == Method.LinearProgramming:
-            return self._lp_solve(model)
+            return self._lp_solve(model, timeout)
         raise ValueError(f"Unsupported method: {method}")
 
-    def _vi_solve(self, model: Model, epsilon: float) -> bool | Optional[float]:
+    def _vi_solve(self, model: Model, timeout: int, epsilon: float) -> bool | Optional[float]:
         arguments = [self._path, "--prism", model.file(),
                                  "-prop", model.property(),
                                  "-eps", str(epsilon), "--absolute",
@@ -40,10 +40,10 @@ class Storm(Tool):
                                  "--multiobjective:method", "pcaa"]
         if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
-    def _lp_solve(self, model: Model) -> bool | Optional[float]:
+    def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
         if '?' in model.property():
             return None
 
@@ -52,7 +52,7 @@ class Storm(Tool):
                                  "--multiobjective:method", "constraintbased"]
         if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
     def _parse_result(self, message: str) -> bool | Optional[float]:

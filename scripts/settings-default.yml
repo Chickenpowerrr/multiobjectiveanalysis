@@ -3,8 +3,13 @@ tools:
     path: ~/bin/storm/bin/storm
   prism:
     path: ~/bin/prism/bin/prism
+  epmc:
+    path: ~/bin/ePMC/epmc-standard.jar
+    java: /usr/bin/java
+    spot: ~/spot/bin/ltl2tgba
 
 analysis:
+  timeout: 120
   valueiteration:
     epsilon:
       min: 0

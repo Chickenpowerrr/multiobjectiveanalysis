@@ -1,0 +1,1 @@
+multi(R{"hire"}max=? [C], R{"money"}<=1000 [C])

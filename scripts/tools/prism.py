@@ -2,8 +2,7 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from scripts.error.error import NoFiniteRewardError, StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, \
-    StateRewardUnsupported
+from scripts.error.error import StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, StateRewardUnsupported
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method, Setting
 
@@ -20,14 +19,14 @@ class Prism(Tool):
         except FileNotFoundError:
             return False
 
-    def solve(self, method: Method, model: Model, parameters: Dict) -> bool | Optional[float]:
+    def solve(self, method: Method, model: Model, timeout: int, parameters: Dict) -> bool | Optional[float]:
         if method == Method.ValueIteration:
-            return self._vi_solve(model, parameters['epsilon'], parameters['absoluteEpsilon'])
+            return self._vi_solve(model, timeout, parameters['epsilon'], parameters['absoluteEpsilon'])
         if method == Method.LinearProgramming:
-            return self._lp_solve(model)
+            return self._lp_solve(model, timeout)
         raise ValueError(f"Unsupported method: {method}")
 
-    def _vi_solve(self, model: Model, epsilon: float, absolute_epsilon: bool) -> bool | Optional[float]:
+    def _vi_solve(self, model: Model, timeout: int, epsilon: float, absolute_epsilon: bool) -> bool | Optional[float]:
         arguments = [self._path, model.file(),
                      "-pf", model.property(),
                      "-epsilon", str(epsilon), "-abs" if absolute_epsilon else "-rel",
@@ -36,15 +35,15 @@ class Prism(Tool):
         if len(arguments) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
-    def _lp_solve(self, model: Model) -> bool | Optional[float]:
+    def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
         arguments = [self._path, model.file(), "-pf", model.property(), "-lp"]
         if len(arguments) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
     def _parse_result(self, message: str) -> bool | Optional[float]:

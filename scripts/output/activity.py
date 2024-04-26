@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import List
 
+from scripts.error.error import ModelError
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method
 
@@ -30,7 +31,7 @@ class ActivityHandler(ABC):
     def start_query(self, tool: Tool, method: Method, model: Model):
         pass
 
-    def invalid_model(self, tool: Tool, model: Model):
+    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
         pass
 
     def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
@@ -81,9 +82,9 @@ class SubscribableActivityHandler(ActivityHandler):
         for activity_handler in self._activity_handlers:
             activity_handler.start_query(tool, method, model)
 
-    def invalid_model(self, tool: Tool, model: Model):
+    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
         for activity_handler in self._activity_handlers:
-            activity_handler.invalid_model(tool, model)
+            activity_handler.invalid_model(tool, model, error)
 
     def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
                                       epsilons: List[float], approx_results: List[float], query_results: List[float]):

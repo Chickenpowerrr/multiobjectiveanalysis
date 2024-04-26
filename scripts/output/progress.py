@@ -1,3 +1,4 @@
+from scripts.error.error import ModelError
 from scripts.model.model import Model
 from scripts.output.activity import ActivityHandler
 from scripts.tools.tool import Tool, Method
@@ -22,5 +23,5 @@ class ProgressActivityHandler(ActivityHandler):
     def start_query(self, tool: Tool, method: Method, model: Model):
         print(f'\t\tStarting query {model.name()} ({tool.__class__.__name__}, {method.name})')
 
-    def invalid_model(self, tool: Tool, model: Model):
-        print(f'Invalid model for {tool.__class__.__name__} detected: {model.name()}')
+    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
+        print(f'Invalid model for {tool.__class__.__name__} detected: {model.name()} ({error.__class__.__name__})')

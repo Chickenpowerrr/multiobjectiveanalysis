@@ -1,0 +1,23 @@
+mdp
+
+module model
+    state : [0..4];
+
+    [exam1] state=0 -> 0.85 : (state'=1) + 0.15 : (state'=2);
+    [stop] state=0 -> 1 : (state'=2);
+    [passed1] state=1 -> 1 : (state'=3);
+    [exam2] state=3 -> 0.8 : (state'=3) + 0.2 : (state'=4);
+    [stop] state=3 -> 1 : (state'=2);
+    [passed2] state=4 -> 1 : (state'=2);
+    [] state=2 -> true;
+endmodule
+
+rewards "hire"
+    [passed1] true : 1;
+    [passed2] true : 3;
+endrewards
+
+rewards "money"
+    [exam1] true : 100;
+    [exam2] true : 240;
+endrewards
