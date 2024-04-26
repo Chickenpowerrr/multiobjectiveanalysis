@@ -39,7 +39,6 @@ def validate_settings(settings) -> List[Tool]:
                                                 os.path.expanduser(properties['spot']))
         else:
             parsed_tool = SUPPORTED_TOOLS[tool](os.path.expanduser(properties['path']))
-            continue
 
         assert parsed_tool.validate(), f"Invalid path for '{tool}': '{properties['path']}'"
         tools.append(parsed_tool)
