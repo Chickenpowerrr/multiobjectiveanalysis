@@ -1,0 +1,1 @@
+multi(R{"grants1"}max=? [ S ], R{"grants2"}>=0.28 [ S ], R{"grants3"}>=0.028 [ S ])

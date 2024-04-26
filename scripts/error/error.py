@@ -25,5 +25,13 @@ class StateRewardUnsupported(ModelError):
     pass
 
 
+class LongRunAverageUnsupported(ModelError):
+    pass
+
+
+class SegmentationFault(ModelError):
+    pass
+
+
 class NullPointerException(ModelError):
     pass

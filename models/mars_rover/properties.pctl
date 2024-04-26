@@ -1,0 +1,2 @@
+multi(Pmax=? [F !"exceedTime" & !"exceedEnergy" & done], P>=0.9 [F "valueCollected"])
+multi(R{"time"}min=? [C], R{"energy"}<=43.99999993400001 [C])

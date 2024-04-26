@@ -1,0 +1,4 @@
+http://www.prismmodelchecker.org/casestudies/rabin.php
+https://github.com/tquatmann/qcomp23-multi/tree/main/models/rab
+
+rab3

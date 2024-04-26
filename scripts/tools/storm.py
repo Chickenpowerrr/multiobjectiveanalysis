@@ -2,7 +2,7 @@ import re
 import subprocess
 from typing import Dict, Optional, List
 
-from scripts.error.error import NoFiniteRewardError, StepboundUnsupported
+from scripts.error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationFault
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method, Setting
 
@@ -62,6 +62,8 @@ class Storm(Tool):
                 raise NoFiniteRewardError()
             if 'Constraint-based solver only supports total-reward objectives' in message:
                 raise StepboundUnsupported()
+            if 'mars_rover' in message and 'constraintbased' in message:
+                raise SegmentationFault()
             raise Exception(message)
 
         try:

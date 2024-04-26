@@ -2,7 +2,8 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from scripts.error.error import StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, StateRewardUnsupported
+from scripts.error.error import StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, StateRewardUnsupported, \
+    LongRunAverageUnsupported
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method, Setting
 
@@ -31,7 +32,7 @@ class Prism(Tool):
                      "-pf", model.property(),
                      "-epsilon", str(epsilon), "-abs" if absolute_epsilon else "-rel",
                      "-paretoepsilon", str(epsilon),
-                     "-maxiters", "100000"]
+                     "-maxiters", "1000000"]
         if len(arguments) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
@@ -57,6 +58,8 @@ class Prism(Tool):
                 raise OnlyCumulativeSupported()
             if 'Multi-objective model checking does not support state rewards; please convert to transition rewards' in message:
                 raise StateRewardUnsupported()
+            if 'Steady-state reward properties cannot be used for MDPs' in message:
+                raise LongRunAverageUnsupported()
             raise Exception(message)
 
         try:

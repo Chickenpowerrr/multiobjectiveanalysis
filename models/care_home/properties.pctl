@@ -1,0 +1,2 @@
+multi(R{"time"}min=? [C], R{"interaction"}>=3.6 [C])
+multi(P>=0.89651995209 [F !"timeExceeded" & taskdone], R{"interaction"}max=? [F "timeExceeded"])
