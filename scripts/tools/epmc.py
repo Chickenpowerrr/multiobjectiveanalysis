@@ -3,6 +3,7 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
+from scripts.error.error import NullPointerException
 from scripts.model.model import Model
 from scripts.tools.tool import Tool, Method, Setting
 
@@ -43,12 +44,14 @@ class Epmc(Tool):
         if len(arguments) > 0:
             arguments.extend(["--const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
-        return self._parse_result(result.stdout)
+        result = subprocess.run(arguments, capture_output=True, text=True, timeout=timeout)
+        return self._parse_result(result.stdout, result.stderr)
 
-    def _parse_result(self, message: str) -> bool | Optional[float]:
+    def _parse_result(self, message: str, error_message: str) -> bool | Optional[float]:
         value = re.search('multi.+?: (.+?)\n', message)
         if value is None:
+            if error_message is not None and 'java.lang.NullPointerException' in error_message:
+                raise NullPointerException()
             raise Exception(message)
 
         try:

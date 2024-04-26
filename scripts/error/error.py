@@ -23,3 +23,7 @@ class OnlyCumulativeSupported(ModelError):
 
 class StateRewardUnsupported(ModelError):
     pass
+
+
+class NullPointerException(ModelError):
+    pass

@@ -45,11 +45,11 @@ def _run_approximation(tool: Tool, method: Method, model: Model, timeout: int, p
     high = 1 if model.probability() else approx_infinity
 
     maximize = model.maximize()
-    # bound_model = model.set_value(high if maximize else 0)
-    # bound_result = tool.solve(method, bound_model, parameters)
-    #
-    # if bound_result:
-    #     return math.inf if maximize else 0
+    bound_model = model.set_value(high if maximize else 0)
+    bound_result = tool.solve(method, bound_model, timeout, parameters)
+
+    if bound_result:
+        return math.inf if maximize else 0
 
     iterations = math.ceil(math.log2((high - low) / approx_precision))
 
