@@ -16,6 +16,9 @@ class ActivityHandler(ABC):
     def start_value_iteration(self, tool: Tool, model: Model):
         pass
 
+    def start_value_iteration_check_early_stop(self):
+        pass
+
     def start_value_iteration_epsilon(self, epsilon: float):
         pass
 
@@ -61,6 +64,10 @@ class SubscribableActivityHandler(ActivityHandler):
     def start_value_iteration(self, tool: Tool, model: Model):
         for activity_handler in self._activity_handlers:
             activity_handler.start_value_iteration(tool, model)
+
+    def start_value_iteration_check_early_stop(self):
+        for activity_handler in self._activity_handlers:
+            activity_handler.start_value_iteration_check_early_stop()
 
     def start_value_iteration_epsilon(self, epsilon: float):
         for activity_handler in self._activity_handlers:

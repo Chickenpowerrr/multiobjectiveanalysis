@@ -16,7 +16,14 @@ def run_value_iteration_analysis(tool: Tool, model: Model, timeout: int,
     approx_results = []
     query_results = []
     epsilons = list(np.arange(max_epsilon, min_epsilon, -epsilon_step))
-    for epsilon in epsilons:
+
+    logger.start_value_iteration_check_early_stop()
+    parameters = {'epsilon': epsilons[-1], 'absoluteEpsilon': absolute_epsilon}
+    last_approx_result = _run_approximation(tool, Method.ValueIteration, model, timeout, parameters,
+                                            approx_infinity, approx_precision)
+    last_query_result = _run_query(tool, Method.ValueIteration, model, timeout, parameters)
+
+    for epsilon in epsilons[:-1]:
         logger.start_value_iteration_epsilon(epsilon)
         parameters = {'epsilon': epsilon, 'absoluteEpsilon': absolute_epsilon}
         approx_result = _run_approximation(tool, Method.ValueIteration, model, timeout, parameters,
@@ -24,6 +31,11 @@ def run_value_iteration_analysis(tool: Tool, model: Model, timeout: int,
         approx_results.append(approx_result)
         query_result = _run_query(tool, Method.ValueIteration, model, timeout, parameters)
         query_results.append(query_result)
+
+        if epsilon != epsilons[-1] and last_approx_result == approx_result and last_query_result == query_result:
+            approx_results.append(last_approx_result)
+            query_results.append(last_query_result)
+            break
     return epsilons, approx_results, query_results
 
 

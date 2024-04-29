@@ -8,6 +8,9 @@ class ProgressActivityHandler(ActivityHandler):
     def start_value_iteration(self, tool: Tool, model: Model):
         print(f'Starting VI {model.name()} ({tool.__class__.__name__})')
 
+    def start_value_iteration_check_early_stop(self):
+        print(f'Starting VI early stop check')
+
     def start_value_iteration_epsilon(self, epsilon: float):
         print(f'\tCurrent epsilon: {epsilon:.5f}')
 
