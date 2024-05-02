@@ -5,16 +5,16 @@ from typing import List
 import yaml
 from jsonschema.validators import validate
 
-from scripts.analysis import analysis
-from scripts.error.error import ModelError, ConvergeError
-from scripts.model.loader import load_models
-from scripts.output.activity import logger
-from scripts.output.progress import ProgressActivityHandler
-from scripts.output.writer import ResultActivityHandler
-from scripts.tools.epmc import Epmc
-from scripts.tools.prism import Prism
-from scripts.tools.storm import Storm
-from scripts.tools.tool import Tool, Method, Setting
+from analysis import analysis
+from error.error import ModelError, ConvergeError
+from model.loader import load_models
+from output.activity import logger
+from output.progress import ProgressActivityHandler
+from output.writer import ResultActivityHandler
+from tools.epmc import Epmc
+from tools.prism import Prism
+from tools.storm import Storm
+from tools.tool import Tool, Method, Setting
 
 SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism, 'epmc': Epmc}
 

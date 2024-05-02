@@ -3,9 +3,9 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from scripts.error.error import NullPointerException
-from scripts.model.model import Model
-from scripts.tools.tool import Tool, Method, Setting
+from error.error import NullPointerException
+from model.model import Model
+from tools.tool import Tool, Method, Setting
 
 
 class Epmc(Tool):

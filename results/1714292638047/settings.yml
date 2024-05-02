@@ -1,0 +1,20 @@
+tools:
+  storm:
+    path: ~/storm/build/bin/storm
+  prism:
+    path: ~/prism/bin/prism
+  epmc:
+    path: ~/ePMC/epmc-standard.jar
+    java: /usr/bin/java
+    spot: ~/spot/bin/ltl2tgba
+
+analysis:
+  timeout: 120
+  valueiteration:
+    epsilon:
+      min: 0
+      max: 0.9
+      step: 0.01
+  approximation:
+    infinity: 100000
+    precision: 0.00001

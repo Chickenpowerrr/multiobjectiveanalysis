@@ -2,5 +2,7 @@
 .idea
 *.iml
 scripts/settings.yml
-results
 epmc-prop.pctl
+
+results/*
+!results/1714292638047

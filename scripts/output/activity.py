@@ -1,9 +1,9 @@
 from abc import ABC
 from typing import List
 
-from scripts.error.error import ModelError
-from scripts.model.model import Model
-from scripts.tools.tool import Tool, Method
+from error.error import ModelError
+from model.model import Model
+from tools.tool import Tool, Method
 
 
 class ActivityHandler(ABC):

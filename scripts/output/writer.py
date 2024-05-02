@@ -2,9 +2,9 @@ import time
 import os.path
 from typing import List
 
-from scripts.model.model import Model
-from scripts.output.activity import ActivityHandler
-from scripts.tools.tool import Tool
+from model.model import Model
+from output.activity import ActivityHandler
+from tools.tool import Tool
 
 
 class ResultActivityHandler(ActivityHandler):

@@ -1,7 +1,7 @@
 import os
 from typing import List, Dict
 
-from scripts.model.model import Model
+from model.model import Model
 
 MODEL_PATH = '../models'
 

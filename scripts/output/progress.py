@@ -1,7 +1,7 @@
-from scripts.error.error import ModelError
-from scripts.model.model import Model
-from scripts.output.activity import ActivityHandler
-from scripts.tools.tool import Tool, Method
+from error.error import ModelError
+from model.model import Model
+from output.activity import ActivityHandler
+from tools.tool import Tool, Method
 
 
 class ProgressActivityHandler(ActivityHandler):

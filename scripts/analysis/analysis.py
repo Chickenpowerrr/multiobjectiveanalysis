@@ -3,9 +3,9 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from scripts.model.model import Model
-from scripts.output.activity import logger
-from scripts.tools.tool import Tool, Method
+from model.model import Model
+from output.activity import logger
+from tools.tool import Tool, Method
 
 
 def run_value_iteration_analysis(tool: Tool, model: Model, timeout: int,

@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from enum import Enum
 from typing import Optional, Dict, List
 
-from scripts.model.model import Model
+from model.model import Model
 
 
 class Method(Enum):
