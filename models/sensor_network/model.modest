@@ -1,0 +1,226 @@
+﻿impatient action ack1_0;
+impatient action ack1_1;
+impatient action ack1_2;
+impatient action ack2_0;
+impatient action ack2_1;
+impatient action ack2_2;
+impatient action alert;
+impatient action crash;
+impatient action data;
+impatient action detect1;
+impatient action detect2;
+impatient action done;
+impatient action extract;
+impatient action noack1;
+impatient action noack2;
+impatient action process1;
+impatient action s1_to_c;
+impatient action s2_to_c;
+impatient action stop1;
+impatient action work;
+
+transient real working = 0;
+transient real success = 0;
+transient real failure = 0;
+int(1..3) msg1 = 1;
+int(1..3) msg2 = 1;
+
+const real UNKNOWN;
+property "Achievability0" = Pmax(<> false);
+property "Numerical0" = Pmax(<> false);
+
+process sensor1()
+{
+   int(0..6) y1 = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(y1 == 6) tau;
+         l()
+      :: when(y1 == 1) ack1_0 {= y1 = 0 =};
+         l()
+      :: when(y1 == 3) ack1_1 {= y1 = 4, msg1 = 3 =};
+         l()
+      :: when(y1 == 5) ack1_2 {= y1 = 6 =};
+         l()
+      :: when(y1 == 0) detect1 {= y1 = 2, msg1 = 2 =};
+         l()
+      :: when(y1 == 1) noack1 {= y1 = 0 =};
+         l()
+      :: when(y1 == 3) noack1 palt {
+         :1: {= y1 = 2 =}; 
+            l()
+         :0: {= y1 = 4, msg1 = 3 =}; 
+            l()
+         }
+      :: when(y1 == 5) noack1 palt {
+         :1: {= y1 = 4 =}; 
+            l()
+         :0: {= y1 = 6 =}; 
+            l()
+         }
+      :: when(y1 == 0) s1_to_c {= y1 = 1 =};
+         l()
+      :: when(y1 == 2) s1_to_c {= y1 = 3 =};
+         l()
+      :: when(y1 == 4) s1_to_c {= y1 = 5 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process sensor2()
+{
+   int(0..6) y2 = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(y2 == 6) tau;
+         l()
+      :: when(y2 == 1) ack2_0 {= y2 = 0 =};
+         l()
+      :: when(y2 == 3) ack2_1 {= y2 = 4, msg2 = 3 =};
+         l()
+      :: when(y2 == 5) ack2_2 {= y2 = 6 =};
+         l()
+      :: when(y2 == 0) detect2 {= y2 = 2, msg2 = 2 =};
+         l()
+      :: when(y2 == 1) noack2 {= y2 = 0 =};
+         l()
+      :: when(y2 == 3) noack2 palt {
+         :1: {= y2 = 2 =}; 
+            l()
+         :0: {= y2 = 4, msg2 = 3 =}; 
+            l()
+         }
+      :: when(y2 == 5) noack2 palt {
+         :1: {= y2 = 4 =}; 
+            l()
+         :0: {= y2 = 6 =}; 
+            l()
+         }
+      :: when(y2 == 0) s2_to_c {= y2 = 1 =};
+         l()
+      :: when(y2 == 2) s2_to_c {= y2 = 3 =};
+         l()
+      :: when(y2 == 4) s2_to_c {= y2 = 5 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process channel()
+{
+   int(0..3) c = 0;
+   int(1..2) who = 1;
+   int(0..3) what = 0;
+   int(0..3) cb1 = 0;
+   int(0..3) cb2 = 0;
+   int(0..2) cbs = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(c == 1 && who == 1 && cbs == 0) ack1_0 {= c = 0, cb1 = msg1, cbs = 1 =};
+         l()
+      :: when(c == 1 && who == 1 && cbs == 1) ack1_0 {= c = 0, cb2 = msg1, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 1 && cbs == 0) ack1_1 {= c = 0, cb1 = msg1, cbs = 1 =};
+         l()
+      :: when(c == 1 && who == 1 && cbs == 1) ack1_1 {= c = 0, cb2 = msg1, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 1 && cbs == 0) ack1_2 {= c = 0, cb1 = msg1, cbs = 1 =};
+         l()
+      :: when(c == 1 && who == 1 && cbs == 1) ack1_2 {= c = 0, cb2 = msg1, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 0) ack2_0 {= c = 0, cb1 = msg2, cbs = 1 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 1) ack2_0 {= c = 0, cb2 = msg2, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 0) ack2_1 {= c = 0, cb1 = msg2, cbs = 1 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 1) ack2_1 {= c = 0, cb2 = msg2, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 1) ack2_2 {= c = 0, cb2 = msg2, cbs = 2 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 0) ack2_2 {= c = 0, cb1 = msg2, cbs = 1 =};
+         l()
+      :: when(c == 3 && what == 2) alert {= c = 0 =};
+         l()
+      :: when(c == 3 && what == 1) data {= c = 0 =};
+         l()
+      :: when(c == 2 && cbs == 1) extract palt {
+         :0.8: {= c = 3, what = cb1, cb1 = 0, cbs = 0 =}; 
+            l()
+         :0.2: {= c = 0, cb1 = 0, cbs = 0 =}; 
+            l()
+         }
+      :: when(c == 2 && cbs == 2) extract palt {
+         :0.8: {= c = 3, what = cb1, cb1 = cb2, cb2 = 0, cbs = 1 =}; 
+            l()
+         :0.2: {= c = 0, cb1 = cb2, cb2 = 0, cbs = 1 =}; 
+            l()
+         }
+      :: when(c == 1 && who == 1 && cbs == 2) noack1 {= c = 0 =};
+         l()
+      :: when(c == 1 && who == 2 && cbs == 2) noack2 {= c = 0 =};
+         l()
+      :: when(c == 0 && cbs > 0) process1 {= c = 2 =};
+         l()
+      :: when(c == 0) s1_to_c {= c = 1, who = 1 =};
+         l()
+      :: when(c == 0) s2_to_c {= c = 1, who = 2 =};
+         l()
+      :: when(c == 3 && what == 3) stop1 {= c = 0 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process proc()
+{
+   int(0..2) x = 0;
+   int(0..10) count = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(x == 0) alert {= count = 0 =};
+         l()
+      :: when(x == 2) crash {= failure = 1 =};
+         l()
+      :: when(x == 0) data {= count = 10 =};
+         l()
+      :: when(x == 1) done {= success = 1 =};
+         l()
+      :: when(x == 0 && count > 0) stop1 palt {
+         :0.95: {= x = 1 =}; 
+            l()
+         :0.05: {= x = 2 =}; 
+            l()
+         }
+      :: when(x == 0 && count == 0) stop1 {= x = 1 =};
+         l()
+      :: when(x == 0 && count > 0) work {= count = count - 1, working = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ ack1_0, ack1_1, ack1_2, ack2_0, ack2_1, ack2_2, alert, crash, data, detect1, detect2, done, extract, noack1, noack2, process1, s1_to_c, s2_to_c, stop1, work } {
+:ack1_0, ack1_1, ack1_2, -, -, -, -, -, -, detect1, -, -, -, noack1, -, -, s1_to_c, -, -, -: sensor1()
+:-, -, -, ack2_0, ack2_1, ack2_2, -, -, -, -, detect2, -, -, -, noack2, -, -, s2_to_c, -, -: sensor2()
+:ack1_0, ack1_1, ack1_2, ack2_0, ack2_1, ack2_2, alert, -, data, -, -, -, extract, noack1, noack2, process1, s1_to_c, s2_to_c, stop1, -: channel()
+:-, -, -, -, -, -, alert, crash, data, -, -, done, -, -, -, -, -, -, stop1, work: proc()
+}

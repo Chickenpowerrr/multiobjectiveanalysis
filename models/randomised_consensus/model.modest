@@ -1,0 +1,161 @@
+﻿impatient action coin1_s1_p1;
+impatient action coin1_s1_p2;
+impatient action coin1_s1_start;
+impatient action coin1_s2_p1;
+impatient action coin1_s2_p2;
+impatient action coin1_s2_start;
+impatient action coin2_s1_p1;
+impatient action coin2_s1_p2;
+impatient action coin2_s1_start;
+impatient action coin2_s2_p1;
+impatient action coin2_s2_p2;
+impatient action coin2_s2_start;
+impatient action done;
+
+transient bool one_proc_err = false;
+transient bool one_coin_ok = false;
+int(0..5) s1 = 0;
+int(0..3) r1 = 0;
+int(0..2) p1 = 0;
+int(0..5) s2 = 0;
+int(0..3) r2 = 0;
+int(0..2) p2 = 0;
+int(0..1) c1 = 0;
+
+const real UNKNOWN;
+property "Achievability0" = multi(Pe(<> one_proc_err) >= UNKNOWN, Pe(<> !one_coin_ok) >= 1-0.10833260973166493);
+property "Numerical0" = multi(Pmax(<> one_proc_err), Pe(<> !one_coin_ok) >= 1-0.10833260973166493);
+
+function bool decide2(int decide2__param__r1, int decide2__param__p1, int decide2__param__r2, int decide2__param__p2) = leaders_agree2(decide2__param__r1, decide2__param__p1, decide2__param__r2, decide2__param__p2) && (decide2__param__p1 == 2 || decide2__param__r1 < max(decide2__param__r1, decide2__param__r2) - 1) && (decide2__param__p2 == 2 || decide2__param__r2 < max(decide2__param__r1, decide2__param__r2) - 1);
+function bool decide1(int decide1__param__r1, int decide1__param__p1, int decide1__param__r2, int decide1__param__p2) = leaders_agree1(decide1__param__r1, decide1__param__p1, decide1__param__r2, decide1__param__p2) && (decide1__param__p1 == 1 || decide1__param__r1 < max(decide1__param__r1, decide1__param__r2) - 1) && (decide1__param__p2 == 1 || decide1__param__r2 < max(decide1__param__r1, decide1__param__r2) - 1);
+function bool leaders_agree2(int leaders_agree2__param__r1, int leaders_agree2__param__p1, int leaders_agree2__param__r2, int leaders_agree2__param__p2) = (leaders_agree2__param__p1 == 2 || leaders_agree2__param__r1 < max(leaders_agree2__param__r1, leaders_agree2__param__r2)) && (leaders_agree2__param__p2 == 2 || leaders_agree2__param__r2 < max(leaders_agree2__param__r1, leaders_agree2__param__r2));
+function bool leaders_agree1(int leaders_agree1__param__r1, int leaders_agree1__param__p1, int leaders_agree1__param__r2, int leaders_agree1__param__p2) = (leaders_agree1__param__p1 == 1 || leaders_agree1__param__r1 < max(leaders_agree1__param__r1, leaders_agree1__param__r2)) && (leaders_agree1__param__p2 == 1 || leaders_agree1__param__r2 < max(leaders_agree1__param__r1, leaders_agree1__param__r2));
+process process1()
+{
+   process l()
+   {
+      with(one_proc_err == (s1 == 5 || s2 == 5) && one_coin_ok == (c1 == 0)) alt {
+      :: when(s1 == 0 && r1 == 0) {= r1 = 1, p1 = 1 =};
+         l()
+      :: when(s1 == 0 && r1 == 0) {= r1 = 1, p1 = 2 =};
+         l()
+      :: when(s1 == 0 && r1 > 0 && r1 <= 3) {= s1 = 1 =};
+         l()
+      :: when(s1 == 1 && decide1(r1, p1, r2, p2)) {= s1 = 4, p1 = 1 =};
+         l()
+      :: when(s1 == 1 && decide2(r1, p1, r2, p2)) {= s1 = 4, p1 = 2 =};
+         l()
+      :: when(!decide1(r1, p1, r2, p2) && r1 < 3 && leaders_agree1(r1, p1, r2, p2) && s1 == 1) {= s1 = 0, r1 = r1 + 1, p1 = 1 =};
+         l()
+      :: when(!decide2(r1, p1, r2, p2) && r1 < 3 && leaders_agree2(r1, p1, r2, p2) && s1 == 1) {= s1 = 0, r1 = r1 + 1, p1 = 2 =};
+         l()
+      :: when(s1 == 1 && r1 < 3 && !(leaders_agree1(r1, p1, r2, p2) || leaders_agree2(r1, p1, r2, p2))) {= s1 = 2, p1 = 0 =};
+         l()
+      :: when(s1 == 1 && r1 == 3 && !(decide1(r1, p1, r2, p2) || decide2(r1, p1, r2, p2))) {= s1 = 5 =};
+         l()
+      :: when(s1 == 3 && r1 == 1) coin1_s1_p1 {= s1 = 0, r1 = r1 + 1, p1 = 1 =};
+         l()
+      :: when(s1 == 3 && r1 == 1) coin1_s1_p2 {= s1 = 0, r1 = r1 + 1, p1 = 2 =};
+         l()
+      :: when(s1 == 2 && r1 == 1) coin1_s1_start {= s1 = 3 =};
+         l()
+      :: when(s1 == 3 && r1 == 2) coin2_s1_p1 {= s1 = 0, r1 = r1 + 1, p1 = 1 =};
+         l()
+      :: when(s1 == 3 && r1 == 2) coin2_s1_p2 {= s1 = 0, r1 = r1 + 1, p1 = 2 =};
+         l()
+      :: when(s1 == 2 && r1 == 2) coin2_s1_start {= s1 = 3 =};
+         l()
+      :: when(s1 >= 4) done;
+         l()
+      }
+   }
+
+   l()
+}
+
+process process2()
+{
+   process l()
+   {
+      alt {
+      :: when(s2 == 0 && r2 == 0) {= r2 = 1, p2 = 1 =};
+         l()
+      :: when(s2 == 0 && r2 == 0) {= r2 = 1, p2 = 2 =};
+         l()
+      :: when(s2 == 0 && r2 > 0 && r2 <= 3) {= s2 = 1 =};
+         l()
+      :: when(s2 == 1 && decide1(r2, p2, r1, p1)) {= s2 = 4, p2 = 1 =};
+         l()
+      :: when(s2 == 1 && decide2(r2, p2, r1, p1)) {= s2 = 4, p2 = 2 =};
+         l()
+      :: when(!decide1(r2, p2, r1, p1) && r2 < 3 && leaders_agree1(r2, p2, r1, p1) && s2 == 1) {= s2 = 0, r2 = r2 + 1, p2 = 1 =};
+         l()
+      :: when(!decide2(r2, p2, r1, p1) && r2 < 3 && leaders_agree2(r2, p2, r1, p1) && s2 == 1) {= s2 = 0, r2 = r2 + 1, p2 = 2 =};
+         l()
+      :: when(s2 == 1 && r2 < 3 && !(leaders_agree1(r2, p2, r1, p1) || leaders_agree2(r2, p2, r1, p1))) {= s2 = 2, p2 = 0 =};
+         l()
+      :: when(s2 == 1 && r2 == 3 && !(decide1(r2, p2, r1, p1) || decide2(r2, p2, r1, p1))) {= s2 = 5 =};
+         l()
+      :: when(s2 == 3 && r2 == 1) coin1_s2_p1 {= s2 = 0, r2 = r2 + 1, p2 = 1 =};
+         l()
+      :: when(s2 == 3 && r2 == 1) coin1_s2_p2 {= s2 = 0, r2 = r2 + 1, p2 = 2 =};
+         l()
+      :: when(s2 == 2 && r2 == 1) coin1_s2_start {= s2 = 3 =};
+         l()
+      :: when(s2 == 3 && r2 == 2) coin2_s2_p1 {= s2 = 0, r2 = r2 + 1, p2 = 1 =};
+         l()
+      :: when(s2 == 3 && r2 == 2) coin2_s2_p2 {= s2 = 0, r2 = r2 + 1, p2 = 2 =};
+         l()
+      :: when(s2 == 2 && r2 == 2) coin2_s2_start {= s2 = 3 =};
+         l()
+      :: when(s2 >= 4) done;
+         l()
+      }
+   }
+
+   l()
+}
+
+process coin1_error()
+{
+   int(0..2) v1 = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(v1 == 0) coin1_s1_p1 {= v1 = 1 =};
+         l()
+      :: when(v1 == 1) coin1_s1_p1;
+         l()
+      :: when(v1 == 2) coin1_s1_p1 {= c1 = 1 =};
+         l()
+      :: when(v1 == 0) coin1_s1_p2 {= v1 = 2 =};
+         l()
+      :: when(v1 == 2) coin1_s1_p2;
+         l()
+      :: when(v1 == 1) coin1_s1_p2 {= c1 = 1 =};
+         l()
+      :: when(v1 == 0) coin1_s2_p1 {= v1 = 1 =};
+         l()
+      :: when(v1 == 1) coin1_s2_p1;
+         l()
+      :: when(v1 == 2) coin1_s2_p1 {= c1 = 1 =};
+         l()
+      :: when(v1 == 0) coin1_s2_p2 {= v1 = 2 =};
+         l()
+      :: when(v1 == 2) coin1_s2_p2;
+         l()
+      :: when(v1 == 1) coin1_s2_p2 {= c1 = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ coin1_s1_p1, coin1_s1_p2, coin1_s1_start, coin1_s2_p1, coin1_s2_p2, coin1_s2_start, coin2_s1_p1, coin2_s1_p2, coin2_s1_start, coin2_s2_p1, coin2_s2_p2, coin2_s2_start, done } {
+:coin1_s1_p1, coin1_s1_p2, coin1_s1_start, -, -, -, coin2_s1_p1, coin2_s1_p2, coin2_s1_start, -, -, -, done: process1()
+:-, -, -, coin1_s2_p1, coin1_s2_p2, coin1_s2_start, -, -, -, coin2_s2_p1, coin2_s2_p2, coin2_s2_start, done: process2()
+:coin1_s1_p1, coin1_s1_p2, -, coin1_s2_p1, coin1_s2_p2, -, -, -, -, -, -, -, -: coin1_error()
+}

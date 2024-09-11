@@ -7,6 +7,8 @@ tools:
     path: ~/bin/ePMC/epmc-standard.jar
     java: /usr/bin/java
     spot: ~/spot/bin/ltl2tgba
+  modest:
+    path: ~/bin/modest/bin/modest
 
 analysis:
   timeout: 120

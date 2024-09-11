@@ -33,8 +33,8 @@ class Storm(Tool):
         raise ValueError(f"Unsupported method: {method}")
 
     def _vi_solve(self, model: Model, timeout: int, epsilon: float) -> bool | Optional[float]:
-        arguments = [self._path, "--prism", model.file(),
-                                 "-prop", model.property(),
+        arguments = [self._path, "--prism", model.prism_file(),
+                                 "-prop", model.prism_property(),
                                  "-eps", str(epsilon), "--absolute",
                                  "--multiobjective:precision", str(epsilon), "abs",
                                  "--multiobjective:method", "pcaa"]
@@ -44,11 +44,11 @@ class Storm(Tool):
         return self._parse_result(result.stdout)
 
     def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
-        if '?' in model.property():
+        if '?' in model.prism_property():
             return None
 
-        arguments = [self._path, "--prism", model.file(),
-                                 "-prop", model.property(),
+        arguments = [self._path, "--prism", model.prism_file(),
+                                 "-prop", model.prism_property(),
                                  "--multiobjective:method", "constraintbased"]
         if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])

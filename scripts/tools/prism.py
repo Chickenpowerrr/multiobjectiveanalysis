@@ -28,19 +28,19 @@ class Prism(Tool):
         raise ValueError(f"Unsupported method: {method}")
 
     def _vi_solve(self, model: Model, timeout: int, epsilon: float, absolute_epsilon: bool) -> bool | Optional[float]:
-        arguments = [self._path, model.file(),
-                     "-pf", model.property(),
+        arguments = [self._path, model.prism_file(),
+                     "-pf", model.prism_property(),
                      "-epsilon", str(epsilon), "-abs" if absolute_epsilon else "-rel",
                      "-paretoepsilon", str(epsilon),
                      "-maxiters", "1000000"]
-        if len(arguments) > 0:
+        if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
         result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
     def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
-        arguments = [self._path, model.file(), "-pf", model.property(), "-lp"]
+        arguments = [self._path, model.prism_file(), "-pf", model.prism_property(), "-lp"]
         if len(arguments) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 

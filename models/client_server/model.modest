@@ -1,0 +1,185 @@
+﻿impatient action client1_cancel;
+impatient action client1_ch_mind;
+impatient action client1_deny;
+impatient action client1_grant;
+impatient action client1_request;
+impatient action client1_useResource;
+impatient action client2_cancel;
+impatient action client2_ch_mind;
+impatient action client2_deny;
+impatient action client2_grant;
+impatient action client2_request;
+impatient action client2_useResource;
+impatient action client3_cancel;
+impatient action client3_ch_mind;
+impatient action client3_deny;
+impatient action client3_grant;
+impatient action client3_request;
+impatient action client3_useResource;
+
+transient real grants = 0;
+transient real grants1 = 0;
+transient real grants2 = 0;
+transient real grants3 = 0;
+
+const real UNKNOWN;
+property "Achievability0" = Pmax(<> false);
+property "Numerical0" = Pmax(<> false);
+
+process server()
+{
+   int(0..3) s = 0;
+   int(0..3) i = 0;
+   int(0..3) j = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(s == 0) client1_cancel;
+         l()
+      :: when(s == 2 && i == 1) client1_cancel {= s = 0, i = 0 =};
+         l()
+      :: when(s == 2 && i != 1) client1_cancel;
+         l()
+      :: when(s == 3 && j == 1) client1_deny {= s = 2, j = 0 =};
+         l()
+      :: when(s == 1 && i == 1) client1_grant {= s = 2, grants = 1, grants1 = 1 =};
+         l()
+      :: when(s == 2) client1_request {= s = 3, j = 1 =};
+         l()
+      :: when(s == 0) client1_request {= s = 1, i = 1 =};
+         l()
+      :: when(s == 2 && i != 2) client2_cancel;
+         l()
+      :: when(s == 2 && i == 2) client2_cancel {= s = 0, i = 0 =};
+         l()
+      :: when(s == 0) client2_cancel;
+         l()
+      :: when(s == 3 && j == 2) client2_deny {= s = 2, j = 0 =};
+         l()
+      :: when(s == 1 && i == 2) client2_grant {= s = 2, grants = 1, grants2 = 1 =};
+         l()
+      :: when(s == 0) client2_request {= s = 1, i = 2 =};
+         l()
+      :: when(s == 2) client2_request {= s = 3, j = 2 =};
+         l()
+      :: when(s == 0) client3_cancel;
+         l()
+      :: when(s == 2 && i == 3) client3_cancel {= s = 0, i = 0 =};
+         l()
+      :: when(s == 2 && i != 3) client3_cancel;
+         l()
+      :: when(s == 3 && j == 3) client3_deny {= s = 2, j = 0 =};
+         l()
+      :: when(s == 1 && i == 3) client3_grant {= s = 2, grants = 1, grants3 = 1 =};
+         l()
+      :: when(s == 0) client3_request {= s = 1, i = 3 =};
+         l()
+      :: when(s == 2) client3_request {= s = 3, j = 3 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process client1()
+{
+   int(-1..3) c1 = -1;
+   
+   process l()
+   {
+      alt {
+      :: when(c1 == 2) client1_cancel {= c1 = 0 =};
+         l()
+      :: when(c1 == 3) client1_cancel {= c1 = 1 =};
+         l()
+      :: when(c1 == -1) client1_ch_mind palt {
+         :0.9: {= c1 = 0 =}; 
+            l()
+         :0.1: {= c1 = 3 =}; 
+            l()
+         }
+      :: when(c1 == 1) client1_deny {= c1 = 0 =};
+         l()
+      :: when(c1 == 1) client1_grant {= c1 = 2 =};
+         l()
+      :: when(c1 == 0) client1_request {= c1 = 1 =};
+         l()
+      :: when(c1 == 2) client1_useResource {= c1 = 2 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process client2()
+{
+   int(-1..3) c2 = -1;
+   
+   process l()
+   {
+      alt {
+      :: when(c2 == 2) client2_cancel {= c2 = 0 =};
+         l()
+      :: when(c2 == 3) client2_cancel {= c2 = 1 =};
+         l()
+      :: when(c2 == -1) client2_ch_mind palt {
+         :0.9: {= c2 = 0 =}; 
+            l()
+         :0.1: {= c2 = 3 =}; 
+            l()
+         }
+      :: when(c2 == 1) client2_deny {= c2 = 0 =};
+         l()
+      :: when(c2 == 1) client2_grant {= c2 = 2 =};
+         l()
+      :: when(c2 == 0) client2_request {= c2 = 1 =};
+         l()
+      :: when(c2 == 2) client2_useResource {= c2 = 2 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process client3()
+{
+   int(-1..3) c3 = -1;
+   
+   process l()
+   {
+      alt {
+      :: when(c3 == 2) client3_cancel {= c3 = 0 =};
+         l()
+      :: when(c3 == 3) client3_cancel {= c3 = 1 =};
+         l()
+      :: when(c3 == -1) client3_ch_mind palt {
+         :0.9: {= c3 = 0 =}; 
+            l()
+         :0.1: {= c3 = 3 =}; 
+            l()
+         }
+      :: when(c3 == 1) client3_deny {= c3 = 0 =};
+         l()
+      :: when(c3 == 1) client3_grant {= c3 = 2 =};
+         l()
+      :: when(c3 == 0) client3_request {= c3 = 1 =};
+         l()
+      :: when(c3 == 2) client3_useResource {= c3 = 2 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ client1_cancel, client1_ch_mind, client1_deny, client1_grant, client1_request, client1_useResource, client2_cancel, client2_ch_mind, client2_deny, client2_grant, client2_request, client2_useResource, client3_cancel, client3_ch_mind, client3_deny, client3_grant, client3_request, client3_useResource } {
+:client1_cancel, -, client1_deny, client1_grant, client1_request, -, client2_cancel, -, client2_deny, client2_grant, client2_request, -, client3_cancel, -, client3_deny, client3_grant, client3_request, -: server()
+:client1_cancel, client1_ch_mind, client1_deny, client1_grant, client1_request, client1_useResource, -, -, -, -, -, -, -, -, -, -, -, -: client1()
+:-, -, -, -, -, -, client2_cancel, client2_ch_mind, client2_deny, client2_grant, client2_request, client2_useResource, -, -, -, -, -, -: client2()
+:-, -, -, -, -, -, -, -, -, -, -, -, client3_cancel, client3_ch_mind, client3_deny, client3_grant, client3_request, client3_useResource: client3()
+}

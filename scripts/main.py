@@ -11,12 +11,13 @@ from model.loader import load_models
 from output.activity import logger
 from output.progress import ProgressActivityHandler
 from output.writer import ResultActivityHandler
+from tools.modest import Modest
 from tools.epmc import Epmc
 from tools.prism import Prism
 from tools.storm import Storm
 from tools.tool import Tool, Method, Setting
 
-SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism, 'epmc': Epmc}
+SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism, 'epmc': Epmc, 'modest': Modest}
 
 
 def get_or_create_settings():
@@ -33,6 +34,8 @@ def validate_settings(settings) -> List[Tool]:
         validate(settings, yaml.safe_load(schema))
     tools = []
     for tool, properties in settings['tools'].items():
+        if tool != 'modest':
+            continue
         if tool == 'epmc':
             parsed_tool = SUPPORTED_TOOLS[tool](os.path.expanduser(properties['path']),
                                                 os.path.expanduser(properties['java']),

@@ -1,0 +1,242 @@
+﻿impatient action check_water;
+impatient action deliver_water;
+impatient action get_water;
+impatient action interact;
+impatient action move;
+impatient action stop1;
+impatient action wait_delay;
+
+const int Unf;
+const int B;
+
+transient bool timeExceeded = false;
+transient real time = 0;
+transient real interaction = 0;
+int(0..2) n_water = 0;
+int(0..2) wants_water6 = 0;
+int(0..2) wants_water7 = 0;
+int(0..2) wants_water11 = 0;
+bool delivered_water6 = false;
+bool delivered_water7 = false;
+bool delivered_water11 = false;
+bool interacted6 = false;
+bool interacted10 = false;
+bool interacted17 = false;
+bool interacted18 = false;
+bool stopped = false;
+int(0..((Unf >= 1 ? B : 0)) + 1) t = (Unf >= 1 ? B : 0);
+
+const real UNKNOWN;
+property "Achievability0" = multi(Xe(S(time), true) <= UNKNOWN, Xe(S(interaction), true) >= 3.6);
+property "Numerical0" = multi(Xmin(S(time), true), Xe(S(interaction), true) >= 3.6);
+property "Achievability1" = Pmax(<> false);
+property "Numerical1" = Pmax(<> false);
+
+
+function bool allow_action() = !stopped && !(taskdone() && interacted10 && interacted17 && interacted18 && interacted6);
+function bool taskdone() = wants_water11 > 0 && num_undelivered_water() == 0 && wants_water6 > 0 && wants_water7 > 0 && n_water == 0;
+function int num_undelivered_water() = ((wants_water6 == 1 && !delivered_water6 ? 1 : 0)) + ((wants_water7 == 1 && !delivered_water7 ? 1 : 0)) + ((wants_water11 == 1 && !delivered_water11 ? 1 : 0));
+process robot()
+{
+   int(0..20) l = 0;
+   bool delay1 = false;
+   
+   process l()
+   {
+      with(timeExceeded == (t == 0)) alt {
+      :: when(l == 7 && wants_water7 == 0) check_water palt {
+         :2 / 10: {= wants_water7 = 1, time = 10 =}; 
+            l()
+         :1 - 2 / 10: {= wants_water7 = 2, time = 10 =}; 
+            l()
+         }
+      :: when(l == 6 && wants_water6 == 0) check_water palt {
+         :2 / 10: {= wants_water6 = 1, time = 10 =}; 
+            l()
+         :1 - 2 / 10: {= wants_water6 = 2, time = 10 =}; 
+            l()
+         }
+      :: when(l == 11 && wants_water11 == 0) check_water palt {
+         :2 / 10: {= wants_water11 = 1, time = 10 =}; 
+            l()
+         :1 - 2 / 10: {= wants_water11 = 2, time = 10 =}; 
+            l()
+         }
+      :: when(n_water > 0 && wants_water11 == 1 && !delivered_water11 && l == 11) deliver_water {= delivered_water11 = true, n_water = n_water - 1, time = 8 =};
+         l()
+      :: when(n_water > 0 && wants_water7 == 1 && !delivered_water7 && l == 7) deliver_water {= delivered_water7 = true, n_water = n_water - 1, time = 8 =};
+         l()
+      :: when(n_water > 0 && wants_water6 == 1 && !delivered_water6 && l == 6) deliver_water {= delivered_water6 = true, n_water = n_water - 1, time = 8 =};
+         l()
+      :: when(n_water < num_undelivered_water() && n_water < 2 && !delay1 && l == 1) get_water palt {
+         :1 / 3: {= n_water = n_water + 1, time = 6 =}; 
+            l()
+         :1 - 1 / 3: {= time = 6 =}; 
+            l()
+         }
+      :: when(l == 18 && !interacted18) interact {= interacted18 = true, time = 15, interaction = 1 =};
+         l()
+      :: when(l == 6 && !interacted6) interact {= interacted6 = true, time = 15, interaction = 1 =};
+         l()
+      :: when(l == 17 && !interacted17) interact {= interacted17 = true, time = 15, interaction = 1 =};
+         l()
+      :: when(l == 10 && !interacted10) interact {= interacted10 = true, time = 15, interaction = 1 =};
+         l()
+      :: when(l == 20 && !delay1) move {= l = 14, time = 1 =};
+         l()
+      :: when(l == 6 && !delay1) move {= l = 3, time = 1 =};
+         l()
+      :: when(l == 4 && !delay1) move {= l = 9, time = 1 =};
+         l()
+      :: when(l == 13 && !delay1) move {= l = 14, time = 1 =};
+         l()
+      :: when(l == 12 && !delay1) move {= l = 13, time = 1 =};
+         l()
+      :: when(l == 12 && !delay1) move {= l = 15, time = 1 =};
+         l()
+      :: when(l == 11 && !delay1) move {= l = 5, time = 1 =};
+         l()
+      :: when(l == 9 && !delay1) move {= l = 4, time = 1 =};
+         l()
+      :: when(l == 7 && !delay1) move {= l = 3, time = 1 =};
+         l()
+      :: when(l == 0 && !delay1) move palt {
+         :1 - 2 / 10: {= l = 2, time = 1 =}; 
+            l()
+         :2 / 10: {= delay1 = true, l = 2, time = 1 =}; 
+            l()
+         }
+      :: when(l == 0 && !delay1) move palt {
+         :1 - 2 / 10: {= l = 3, time = 1 =}; 
+            l()
+         :2 / 10: {= delay1 = true, l = 3, time = 1 =}; 
+            l()
+         }
+      :: when(l == 5 && !delay1) move {= l = 10, time = 1 =};
+         l()
+      :: when(l == 5 && !delay1) move {= l = 4, time = 1 =};
+         l()
+      :: when(l == 1 && !delay1) move {= l = 0, time = 1 =};
+         l()
+      :: when(l == 2 && !delay1) move {= l = 0, time = 1 =};
+         l()
+      :: when(l == 3 && !delay1) move {= l = 0, time = 1 =};
+         l()
+      :: when(l == 0 && !delay1) move palt {
+         :1 - 2 / 10: {= l = 1, time = 1 =}; 
+            l()
+         :2 / 10: {= delay1 = true, l = 1, time = 1 =}; 
+            l()
+         }
+      :: when(l == 14 && !delay1) move {= l = 19, time = 1 =};
+         l()
+      :: when(l == 15 && !delay1) move {= l = 12, time = 1 =};
+         l()
+      :: when(l == 17 && !delay1) move {= l = 13, time = 1 =};
+         l()
+      :: when(l == 13 && !delay1) move {= l = 18, time = 1 =};
+         l()
+      :: when(l == 3 && !delay1) move {= l = 4, time = 1 =};
+         l()
+      :: when(l == 14 && !delay1) move {= l = 13, time = 1 =};
+         l()
+      :: when(l == 13 && !delay1) move {= l = 17, time = 1 =};
+         l()
+      :: when(l == 13 && !delay1) move {= l = 12, time = 1 =};
+         l()
+      :: when(l == 12 && !delay1) move {= l = 16, time = 1 =};
+         l()
+      :: when(l == 12 && !delay1) move {= l = 0, time = 1 =};
+         l()
+      :: when(l == 10 && !delay1) move {= l = 5, time = 1 =};
+         l()
+      :: when(l == 8 && !delay1) move {= l = 4, time = 1 =};
+         l()
+      :: when(l == 3 && !delay1) move {= l = 6, time = 1 =};
+         l()
+      :: when(l == 19 && !delay1) move {= l = 14, time = 1 =};
+         l()
+      :: when(l == 5 && !delay1) move {= l = 11, time = 1 =};
+         l()
+      :: when(l == 0 && !delay1) move palt {
+         :1 - 2 / 10: {= l = 12, time = 1 =}; 
+            l()
+         :2 / 10: {= delay1 = true, l = 12, time = 1 =}; 
+            l()
+         }
+      :: when(l == 4 && !delay1) move {= l = 8, time = 1 =};
+         l()
+      :: when(l == 4 && !delay1) move {= l = 5, time = 1 =};
+         l()
+      :: when(l == 4 && !delay1) move {= l = 3, time = 1 =};
+         l()
+      :: when(l == 3 && !delay1) move {= l = 7, time = 1 =};
+         l()
+      :: when(l == 14 && !delay1) move {= l = 20, time = 1 =};
+         l()
+      :: when(l == 16 && !delay1) move {= l = 12, time = 1 =};
+         l()
+      :: when(l == 18 && !delay1) move {= l = 13, time = 1 =};
+         l()
+      :: when(delay1) wait_delay {= delay1 = false, time = 5 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process stopper()
+{
+   process l()
+   {
+      alt {
+      :: when(allow_action()) check_water;
+         l()
+      :: when(allow_action()) deliver_water;
+         l()
+      :: when(allow_action()) get_water;
+         l()
+      :: when(allow_action()) interact;
+         l()
+      :: when(allow_action()) move;
+         l()
+      :: when(taskdone()) stop1 {= stopped = true =};
+         l()
+      :: when(allow_action()) wait_delay;
+         l()
+      }
+   }
+
+   l()
+}
+
+process timer()
+{
+   process l()
+   {
+      alt {
+      :: check_water {= t = max(0, t - 10) =};
+         l()
+      :: deliver_water {= t = max(0, t - 8) =};
+         l()
+      :: get_water {= t = max(0, t - 6) =};
+         l()
+      :: interact {= t = max(0, t - 15) =};
+         l()
+      :: move {= t = max(0, t - 1) =};
+         l()
+      :: wait_delay {= t = max(0, t - 5) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ check_water, deliver_water, get_water, interact, move, stop1, wait_delay } {
+:check_water, deliver_water, get_water, interact, move, -, wait_delay: robot()
+:check_water, deliver_water, get_water, interact, move, stop1, wait_delay: stopper()
+:check_water, deliver_water, get_water, interact, move, -, wait_delay: timer()
+}

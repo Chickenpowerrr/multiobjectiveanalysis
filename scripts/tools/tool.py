@@ -14,7 +14,6 @@ class Setting(Enum):
     RelativeEpsilon = 0
     AbsoluteEpsilon = 1
 
-
 class Tool(ABC):
 
     @abstractmethod

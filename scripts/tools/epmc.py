@@ -32,16 +32,16 @@ class Epmc(Tool):
         if os.path.exists("epmc-prop.pctl"):
             os.remove("epmc-prop.pctl")
         with open("epmc-prop.pctl", 'w') as prop_file:
-            prop_file.write(model.property())
+            prop_file.write(model.prism_property())
 
         arguments = [self._java, '-jar', self._path, 'check',
-                     "--model-input-files", model.file(),
+                     "--model-input-files", model.prism_file(),
                      "--property-input-files", "epmc-prop.pctl",
                      "--graphsolver-iterative-stop-criterion", "absolute" if absolute_epsilon else "relative",
                      "--automaton-spot-ltl2tgba-cmd", self._spot,
                      "--graphsolver-iterative-tolerance", str(epsilon),
                      "--multi-objective-min-increase", str(epsilon)]
-        if len(arguments) > 0:
+        if len(model.constants()) > 0:
             arguments.extend(["--const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
         result = subprocess.run(arguments, capture_output=True, text=True, timeout=timeout)
@@ -60,6 +60,8 @@ class Epmc(Tool):
             if value.group(1) == 'true':
                 return True
             if value.group(1) == 'false':
+                return False
+            if 'Numerical multi-objective problem is infeasible' in message:
                 return False
             raise ValueError(message)
 

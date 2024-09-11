@@ -41,6 +41,15 @@ properties:
           spot:
             description: The path to the spot platform
             type: string
+      modest:
+        description: The settings for the Modest model checker
+        type: object
+        required: [path]
+        additionalProperties: false
+        properties:
+          path:
+            description: The path to the Modest model checker
+            type: string
   analysis:
     description: The settings for the experiments
     type: object
