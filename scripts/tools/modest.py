@@ -7,6 +7,8 @@ from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationF
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
+from error.error import UnsupportedProperty, UnsupportedConversion
+
 
 class Modest(Tool):
 
@@ -27,6 +29,9 @@ class Modest(Tool):
         return [Setting.AbsoluteEpsilon, Setting.RelativeEpsilon]
 
     def solve(self, method: Method, model: Model, timeout: int, parameters: Dict) -> bool | Optional[float]:
+        if not os.path.exists(model.modest_file()):
+            raise UnsupportedConversion()
+
         if method == Method.ValueIteration:
             return self._vi_solve(model, timeout, parameters['epsilon'] , parameters['absoluteEpsilon'])
         if method == Method.LinearProgramming:
@@ -69,6 +74,8 @@ class Modest(Tool):
         if value is None:
             if 'infinite cumulative reward' in message:
                 raise NoFiniteRewardError()
+            if 'There is no property named' in message:
+                raise UnsupportedProperty()
             raise Exception(message)
 
         try:

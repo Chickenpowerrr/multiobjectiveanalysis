@@ -23,8 +23,6 @@ transient real grants2 = 0;
 transient real grants3 = 0;
 
 const real UNKNOWN;
-property "Achievability0" = Pmax(<> false);
-property "Numerical0" = Pmax(<> false);
 
 process server()
 {

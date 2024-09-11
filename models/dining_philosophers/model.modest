@@ -13,8 +13,6 @@ int(0..2) p3 = 0;
 int(0..1) draw3 = 0;
 
 const real UNKNOWN;
-property "Achievability0" = Pmax(<> false);
-property "Numerical0" = Pmax(<> false);
 
 function int maxb(int maxb__param__b1, int maxb__param__b2, int maxb__param__b3) = max(max(maxb__param__b1, maxb__param__b2), maxb__param__b3);
 function int num_procs_in_crit(int num_procs_in_crit__param__p1, int num_procs_in_crit__param__p2, int num_procs_in_crit__param__p3) = ((num_procs_in_crit__param__p1 == 2 ? 1 : 0)) + ((num_procs_in_crit__param__p2 == 2 ? 1 : 0)) + ((num_procs_in_crit__param__p3 == 2 ? 1 : 0));

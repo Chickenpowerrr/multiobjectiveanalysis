@@ -34,8 +34,6 @@ def validate_settings(settings) -> List[Tool]:
         validate(settings, yaml.safe_load(schema))
     tools = []
     for tool, properties in settings['tools'].items():
-        if tool != 'modest':
-            continue
         if tool == 'epmc':
             parsed_tool = SUPPORTED_TOOLS[tool](os.path.expanduser(properties['path']),
                                                 os.path.expanduser(properties['java']),
@@ -79,9 +77,9 @@ def run_experiments(models, tools, settings):
                                                                      approx_infinity, approx_precision))
                         logger.handle_linear_program_result(tool, model, approx_result, query_result)
                 except TimeoutExpired:
-                    logger.invalid_model(tool, model, ConvergeError())
+                    logger.invalid_model(tool, model, method, ConvergeError())
                 except ModelError as error:
-                    logger.invalid_model(tool, model, error)
+                    logger.invalid_model(tool, model, method, error)
 
 
 if __name__ == '__main__':

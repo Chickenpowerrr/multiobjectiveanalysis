@@ -29,9 +29,6 @@ int(0..((Unf >= 1 ? B : 0)) + 1) t = (Unf >= 1 ? B : 0);
 const real UNKNOWN;
 property "Achievability0" = multi(Xe(S(time), true) <= UNKNOWN, Xe(S(interaction), true) >= 3.6);
 property "Numerical0" = multi(Xmin(S(time), true), Xe(S(interaction), true) >= 3.6);
-property "Achievability1" = Pmax(<> false);
-property "Numerical1" = Pmax(<> false);
-
 
 function bool allow_action() = !stopped && !(taskdone() && interacted10 && interacted17 && interacted18 && interacted6);
 function bool taskdone() = wants_water11 > 0 && num_undelivered_water() == 0 && wants_water6 > 0 && wants_water7 > 0 && n_water == 0;

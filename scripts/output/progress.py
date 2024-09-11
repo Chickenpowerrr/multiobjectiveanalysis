@@ -26,5 +26,5 @@ class ProgressActivityHandler(ActivityHandler):
     def start_query(self, tool: Tool, method: Method, model: Model):
         print(f'\t\tStarting query {model.name()} ({tool.__class__.__name__}, {method.name})')
 
-    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
+    def invalid_model(self, tool: Tool, model: Model, method: Method, error: ModelError):
         print(f'Invalid model for {tool.__class__.__name__} detected: {model.name()} ({error.__class__.__name__})')

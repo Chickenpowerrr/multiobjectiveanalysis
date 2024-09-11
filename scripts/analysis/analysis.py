@@ -32,10 +32,13 @@ def run_value_iteration_analysis(tool: Tool, model: Model, timeout: int,
         query_result = _run_query(tool, Method.ValueIteration, model, timeout, parameters)
         query_results.append(query_result)
 
-        if epsilon != epsilons[-1] and last_approx_result == approx_result and last_query_result == query_result:
-            approx_results.append(last_approx_result)
-            query_results.append(last_query_result)
+        if last_approx_result == approx_result and last_query_result == query_result:
             break
+
+    epsilons[len(approx_results)] = epsilons[-1]
+    approx_results.append(last_approx_result)
+    query_results.append(last_query_result)
+
     return epsilons, approx_results, query_results
 
 
