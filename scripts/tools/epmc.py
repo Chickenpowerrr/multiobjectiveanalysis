@@ -3,7 +3,7 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from error.error import NullPointerException
+from error.error import NullPointerException, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -52,7 +52,8 @@ class Epmc(Tool):
         if value is None:
             if error_message is not None and 'java.lang.NullPointerException' in error_message:
                 raise NullPointerException()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))

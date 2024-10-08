@@ -3,7 +3,7 @@ import subprocess
 from typing import List, Dict, Optional
 
 from error.error import StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, StateRewardUnsupported, \
-    LongRunAverageUnsupported
+    LongRunAverageUnsupported, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -60,7 +60,8 @@ class Prism(Tool):
                 raise StateRewardUnsupported()
             if 'Steady-state reward properties cannot be used for MDPs' in message:
                 raise LongRunAverageUnsupported()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))

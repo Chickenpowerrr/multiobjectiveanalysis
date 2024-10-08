@@ -7,7 +7,7 @@ from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationF
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
-from error.error import UnsupportedProperty, UnsupportedConversion
+from error.error import UnknownError, UnsupportedProperty, UnsupportedConversion
 
 
 class Modest(Tool):
@@ -76,7 +76,8 @@ class Modest(Tool):
                 raise NoFiniteRewardError()
             if 'There is no property named' in message:
                 raise UnsupportedProperty()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))

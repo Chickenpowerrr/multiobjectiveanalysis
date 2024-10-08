@@ -60,11 +60,17 @@ def _run_approximation(tool: Tool, method: Method, model: Model, timeout: int, p
     high = 1 if model.probability() else approx_infinity
 
     maximize = model.maximize()
-    bound_model = model.set_value(high if maximize else 0)
-    bound_result = tool.solve(method, bound_model, timeout, parameters)
+    best_bound_model = model.set_value(high if maximize else 0)
+    best_bound_result = tool.solve(method, best_bound_model, timeout, parameters)
 
-    if bound_result:
+    if best_bound_result:
         return math.inf if maximize else 0
+
+    worst_model = model.set_value(0 if maximize else high)
+    worst_bound_result = tool.solve(method, worst_model, timeout, parameters)
+
+    if not worst_bound_result:
+        return False
 
     iterations = math.ceil(math.log2((high - low) / approx_precision))
 

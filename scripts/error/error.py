@@ -43,3 +43,7 @@ class UnsupportedProperty(ModelError):
 
 class UnsupportedConversion(ModelError):
     pass
+
+
+class UnknownError(ModelError):
+    pass

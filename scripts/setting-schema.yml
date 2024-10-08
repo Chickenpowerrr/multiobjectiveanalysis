@@ -53,19 +53,19 @@ properties:
   analysis:
     description: The settings for the experiments
     type: object
-    required: [timeout, valueiteration, approximation]
+    required: [valueiteration, approximation]
     additionalProperties: false
     properties:
-      timeout:
-        description: The maximum time in seconds that one query can take
-        type: number
-        minimum: 0
       valueiteration:
         description: The settings for value iteration experiments
         type: object
-        required: [epsilon]
+        required: [timeout, epsilon]
         additionalProperties: false
         properties:
+          timeout:
+            description: The maximum time in seconds that one query can take
+            type: number
+            minimum: 0
           epsilon:
             type: object
             required: [min, max, step]
@@ -86,6 +86,16 @@ properties:
                 type: number
                 exclusiveMinimum: 0
                 maximum: 1
+      linearprogramming:
+        description: The settings for linear programming experiments
+        type: object
+        required: [timeout]
+        additionalProperties: false
+        properties:
+          timeout:
+            description: The maximum time in seconds that one query can take
+            type: number
+            minimum: 0
       approximation:
         description: The settings when approximating a numerical query by using achievability queries
         type: object

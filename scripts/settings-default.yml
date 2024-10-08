@@ -11,12 +11,14 @@ tools:
     path: ~/bin/modest/bin/modest
 
 analysis:
-  timeout: 120
   valueiteration:
+    timeout: 120
     epsilon:
       min: 0
       max: 0.9
       step: 0.01
+  linearprogramming:
+    timeout: 600
   approximation:
     infinity: 100000
     precision: 0.00001

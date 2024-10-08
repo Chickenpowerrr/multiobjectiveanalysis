@@ -2,7 +2,7 @@ import re
 import subprocess
 from typing import Dict, Optional, List
 
-from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationFault
+from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationFault, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -49,7 +49,7 @@ class Storm(Tool):
 
         arguments = [self._path, "--prism", model.prism_file(),
                                  "-prop", model.prism_property(),
-                                 "--multiobjective:method", "constraintbased"]
+                                 "--multiobjective:method", "constraintbased", "--exact"]
         if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
         result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
@@ -64,7 +64,8 @@ class Storm(Tool):
                 raise StepboundUnsupported()
             if 'mars_rover' in message and 'constraintbased' in message:
                 raise SegmentationFault()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))
