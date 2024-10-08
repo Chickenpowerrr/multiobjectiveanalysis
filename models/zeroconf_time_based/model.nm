@@ -149,17 +149,17 @@ endmodule
 
 //-------------------------------------------------------------
 // error automaton for the time bounded assumption
-// host does not send configured signal within T seconds
-const int T;
+// host does not send configured signal within T1 seconds
+const int T1;
 
 module time_error
 
 	time_error : [0..1];
 	done : [0..1];
-	t : [0..T];
+	t : [0..T1];
 
-	[time] t<T-1 & done=0 & time_error=0 -> (t'=t+1);	// time passes and bound not reached
-	[time] t=T-1 & done=0 & time_error=0 -> (time_error'=1); // bound reached so error
+	[time] t<T1-1 & done=0 & time_error=0 -> (t'=t+1);	// time passes and bound not reached
+	[time] t=T1-1 & done=0 & time_error=0 -> (time_error'=1); // bound reached so error
 	[configured] time_error=0 -> (done'=1); // configured within the time bound
 
 	// when in error or done state can loop with either action

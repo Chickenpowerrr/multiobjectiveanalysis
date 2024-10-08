@@ -1,0 +1,197 @@
+﻿impatient action rover_done;
+impatient action task1_start;
+impatient action task2_start;
+impatient action task3_start;
+impatient action task4_start;
+impatient action task_done;
+
+const int Unf;
+const int B;
+
+transient bool valueCollected = false;
+transient bool exceedTime = false;
+transient bool exceedEnergy = false;
+transient real value = 0;
+transient real time = 0;
+transient real energy = 0;
+int(0..4) task = 0;
+bool success = false;
+bool increased_energy = false;
+int(0..((Unf >= 1 ? B * 5 : 0)) + 1) counter_value = (Unf >= 1 ? B * 5 : 0);
+int(0..((Unf >= 2 ? B * 9 + 1 : 0)) + 1) counter_time = (Unf >= 2 ? B * 9 + 1 : 0);
+int(0..((Unf >= 2 ? B * 5 + 1 : 0)) + 1) counter_energy = (Unf >= 2 ? B * 5 + 1 : 0);
+
+const real UNKNOWN;
+property "Achievability0" = multi(Pe(<> (!exceedTime && !exceedEnergy && done)) >= UNKNOWN, Pe(<> valueCollected) >= 0.9);
+property "Numerical0" = multi(Pmax(<> (!exceedTime && !exceedEnergy && done)), Pe(<> valueCollected) >= 0.9);
+property "Achievability1" = multi(Xe(S(time), true) <= UNKNOWN, Xe(S(energy), true) <= 43.99999993400001);
+property "Numerical1" = multi(Xmin(S(time), true), Xe(S(energy), true) <= 43.99999993400001);
+
+function bool high_value_task() = task == 4;
+function bool medium_value_task() = task == 1 || task == 2;
+function bool low_value_task() = task == 3;
+function bool high_energy_task() = task == 4;
+function bool medium_energy_task() = task == 2;
+function bool low_energy_task() = task == 1 || task == 3;
+function bool high_time_task() = task == 1 || task == 4;
+function bool medium_time_task() = false;
+function bool low_time_task() = task == 2 || task == 3;
+
+bool done = false;
+process rover()
+{
+   process l()
+   {
+      with(valueCollected == (counter_value == 0) && exceedTime == (counter_time == 0) && exceedEnergy == (counter_energy == 0)) alt {
+      :: when(Unf != 1 && task == 0) rover_done {= done = true =};
+         l()
+      :: when(task == 0 && !done) task1_start palt {
+         :0.5: {= success = true, task = 1 =}; 
+            l()
+         :0.5: {= success = false, task = 1 =}; 
+            l()
+         }
+      :: when(task == 0 && !done) task2_start palt {
+         :0.6: {= success = true, task = 2 =}; 
+            l()
+         :0.4: {= success = false, task = 2 =}; 
+            l()
+         }
+      :: when(task == 0 && !done) task3_start palt {
+         :0.8: {= success = true, task = 3 =}; 
+            l()
+         :0.2: {= success = false, task = 3 =}; 
+            l()
+         }
+      :: when(task == 0 && !done) task4_start palt {
+         :0.2: {= success = true, task = 4 =}; 
+            l()
+         :0.8: {= success = false, task = 4 =}; 
+            l()
+         }
+      :: when(task > 0 && !done) task_done {= success = false, task = 0, value = ((low_value_task() && success ? 2 : 0)) + ((medium_value_task() && success ? 10 : 0)) + ((high_value_task() && success ? 30 : 0)), time = ((low_time_task() ? 5 : 0)) + ((medium_time_task() ? 8 : 0)) + ((high_time_task() ? 10 : 0)), energy = ((high_energy_task() && increased_energy ? 7 : 0)) + ((low_energy_task() && increased_energy ? 5 : 0)) + ((medium_energy_task() && increased_energy ? 7 : 0)) + ((medium_energy_task() && !increased_energy ? 5 : 0)) + ((high_energy_task() && !increased_energy ? 7 : 0)) + ((low_energy_task() && !increased_energy ? 3 : 0)) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process battery()
+{
+   process l()
+   {
+      alt {
+      :: task1_start palt {
+         :0.5: {= increased_energy = false =}; 
+            l()
+         :0.5: {= increased_energy = true =}; 
+            l()
+         }
+      :: task2_start palt {
+         :0.5: {= increased_energy = false =}; 
+            l()
+         :0.5: {= increased_energy = true =}; 
+            l()
+         }
+      :: task3_start palt {
+         :0.5: {= increased_energy = false =}; 
+            l()
+         :0.5: {= increased_energy = true =}; 
+            l()
+         }
+      :: task4_start {= increased_energy = false =};
+         l()
+      :: task_done {= increased_energy = false =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process value_counting_module()
+{
+   process l()
+   {
+      alt {
+      :: when(low_value_task()) task_done {= counter_value = max(0, counter_value - ((success ? 2 : 0))) =};
+         l()
+      :: when(medium_value_task()) task_done {= counter_value = max(0, counter_value - ((success ? 10 : 0))) =};
+         l()
+      :: when(high_value_task()) task_done {= counter_value = max(0, counter_value - ((success ? 30 : 0))) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process time_counting_module()
+{
+   process l()
+   {
+      alt {
+      :: when(low_time_task()) task_done {= counter_time = max(0, counter_time - 5) =};
+         l()
+      :: when(medium_time_task()) task_done {= counter_time = max(0, counter_time - 8) =};
+         l()
+      :: when(high_time_task()) task_done {= counter_time = max(0, counter_time - 10) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process energy_counting_module()
+{
+   process l()
+   {
+      alt {
+      :: when(low_energy_task() && !increased_energy) task_done {= counter_energy = max(0, counter_energy - 3) =};
+         l()
+      :: when(low_energy_task() && increased_energy) task_done {= counter_energy = max(0, counter_energy - 5) =};
+         l()
+      :: when(medium_energy_task() && !increased_energy) task_done {= counter_energy = max(0, counter_energy - 5) =};
+         l()
+      :: when(medium_energy_task() && increased_energy) task_done {= counter_energy = max(0, counter_energy - 7) =};
+         l()
+      :: when(high_energy_task() && !increased_energy) task_done {= counter_energy = max(0, counter_energy - 7) =};
+         l()
+      :: when(high_energy_task() && increased_energy) task_done {= counter_energy = max(0, counter_energy - 7) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process unfold()
+{
+   process l()
+   {
+      alt {
+      :: when(Unf == 0 || !(counter_value == 0 && counter_time == 0 && counter_energy == 0)) task1_start;
+         l()
+      :: when(Unf == 0 || !(counter_value == 0 && counter_time == 0 && counter_energy == 0)) task2_start;
+         l()
+      :: when(Unf == 0 || !(counter_value == 0 && counter_time == 0 && counter_energy == 0)) task3_start;
+         l()
+      :: when(Unf == 0 || !(counter_value == 0 && counter_time == 0 && counter_energy == 0)) task4_start;
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ rover_done, task1_start, task2_start, task3_start, task4_start, task_done } {
+:rover_done, task1_start, task2_start, task3_start, task4_start, task_done: rover()
+:-, task1_start, task2_start, task3_start, task4_start, task_done: battery()
+:-, -, -, -, -, task_done: value_counting_module()
+:-, -, -, -, -, task_done: time_counting_module()
+:-, -, -, -, -, task_done: energy_counting_module()
+:-, task1_start, task2_start, task3_start, task4_start, -: unfold()
+}

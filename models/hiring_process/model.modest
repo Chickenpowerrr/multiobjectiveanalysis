@@ -1,0 +1,52 @@
+﻿impatient action exam1;
+impatient action exam2;
+impatient action passed1;
+impatient action passed2;
+impatient action stop1;
+
+transient real hire = 0;
+transient real money = 0;
+
+const real UNKNOWN;
+property "Achievability0" = multi(Xe(S(hire), true) >= UNKNOWN, Xe(S(money), true) <= 1000);
+property "Numerical0" = multi(Xmax(S(hire), true), Xe(S(money), true) <= 1000);
+
+process model()
+{
+   int(0..4) state = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(state == 2) tau;
+         l()
+      :: when(state == 0) exam1 palt {
+         :0.85: {= state = 1, money = 100 =}; 
+            l()
+         :0.15: {= state = 2, money = 100 =}; 
+            l()
+         }
+      :: when(state == 3) exam2 palt {
+         :0.8: {= state = 3, money = 240 =}; 
+            l()
+         :0.2: {= state = 4, money = 240 =}; 
+            l()
+         }
+      :: when(state == 1) passed1 {= state = 3, hire = 1 =};
+         l()
+      :: when(state == 4) passed2 {= state = 2, hire = 3 =};
+         l()
+      :: when(state == 0) stop1 {= state = 2 =};
+         l()
+      :: when(state == 3) stop1 {= state = 2 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ exam1, exam2, passed1, passed2, stop1 } {
+:exam1, exam2, passed1, passed2, stop1: model()
+}

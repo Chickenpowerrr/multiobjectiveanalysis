@@ -2,7 +2,7 @@ import re
 import subprocess
 from typing import Dict, Optional, List
 
-from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationFault
+from error.error import NoFiniteRewardError, StepboundUnsupported, SegmentationFault, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -33,8 +33,8 @@ class Storm(Tool):
         raise ValueError(f"Unsupported method: {method}")
 
     def _vi_solve(self, model: Model, timeout: int, epsilon: float) -> bool | Optional[float]:
-        arguments = [self._path, "--prism", model.file(),
-                                 "-prop", model.property(),
+        arguments = [self._path, "--prism", model.prism_file(),
+                                 "-prop", model.prism_property(),
                                  "-eps", str(epsilon), "--absolute",
                                  "--multiobjective:precision", str(epsilon), "abs",
                                  "--multiobjective:method", "pcaa"]
@@ -44,12 +44,12 @@ class Storm(Tool):
         return self._parse_result(result.stdout)
 
     def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
-        if '?' in model.property():
+        if '?' in model.prism_property():
             return None
 
-        arguments = [self._path, "--prism", model.file(),
-                                 "-prop", model.property(),
-                                 "--multiobjective:method", "constraintbased"]
+        arguments = [self._path, "--prism", model.prism_file(),
+                                 "-prop", model.prism_property(),
+                                 "--multiobjective:method", "constraintbased", "--exact"]
         if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
         result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
@@ -64,7 +64,8 @@ class Storm(Tool):
                 raise StepboundUnsupported()
             if 'mars_rover' in message and 'constraintbased' in message:
                 raise SegmentationFault()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))

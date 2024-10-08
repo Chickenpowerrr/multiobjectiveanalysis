@@ -1,0 +1,178 @@
+﻿impatient action attack11_12;
+impatient action attack11_21;
+impatient action attack12_11;
+impatient action attack12_22;
+impatient action attack21_11;
+impatient action attack21_22;
+impatient action attack22_12;
+impatient action attack22_21;
+impatient action clean_11;
+impatient action clean_12;
+impatient action clean_21;
+impatient action clean_22;
+
+transient real attacks = 0;
+transient real clean = 0;
+transient real withvirus = 0;
+int(0..2) s11 = 2;
+int(0..2) s21 = 2;
+int(0..2) s12 = 2;
+int(0..2) s22 = 2;
+
+const real UNKNOWN;
+
+process n11()
+{
+   process l()
+   {
+      with(withvirus == ((s22 == 2 ? 1 : 0)) + ((s12 == 2 ? 1 : 0)) + ((s21 == 2 ? 1 : 0)) + ((s11 == 2 ? 1 : 0))) alt {
+      :: when(s11 == 1) palt {
+         :0.5: {= s11 = 2 =}; 
+            l()
+         :0.5: {= s11 = 0 =}; 
+            l()
+         }
+      :: when(s11 == 2) {= s11 = 2 =};
+         l()
+      :: when(s11 == 0) attack11_12 palt {
+         :0.5: {= attacks = 1 =}; 
+            l()
+         :0.5: {= s11 = 1, attacks = 1 =}; 
+            l()
+         }
+      :: when(s11 == 0) attack11_21 palt {
+         :0.5: {= attacks = 1 =}; 
+            l()
+         :0.5: {= s11 = 1, attacks = 1 =}; 
+            l()
+         }
+      :: when(s11 == 2) attack12_11 {= attacks = 1 =};
+         l()
+      :: when(s11 == 2) attack21_11 {= attacks = 1 =};
+         l()
+      :: when(s11 == 2) clean_11 {= s11 = 0, clean = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process n21()
+{
+   process l()
+   {
+      alt {
+      :: when(s21 == 1) palt {
+         :0.5: {= s21 = 2 =}; 
+            l()
+         :0.5: {= s21 = 0 =}; 
+            l()
+         }
+      :: when(s21 == 2) {= s21 = 2 =};
+         l()
+      :: when(s21 == 2) attack11_21;
+         l()
+      :: when(s21 == 0) attack21_11 palt {
+         :0.3: {==}; 
+            l()
+         :0.7: {= s21 = 1 =}; 
+            l()
+         }
+      :: when(s21 == 0) attack21_22 palt {
+         :0.3: {= attacks = 1 =}; 
+            l()
+         :0.7: {= s21 = 1, attacks = 1 =}; 
+            l()
+         }
+      :: when(s21 == 2) attack22_21 {= attacks = 1 =};
+         l()
+      :: when(s21 == 2) clean_21 {= s21 = 0, clean = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process n12()
+{
+   process l()
+   {
+      alt {
+      :: when(s12 == 1) palt {
+         :0.5: {= s12 = 2 =}; 
+            l()
+         :0.5: {= s12 = 0 =}; 
+            l()
+         }
+      :: when(s12 == 2) {= s12 = 2 =};
+         l()
+      :: when(s12 == 2) attack11_12;
+         l()
+      :: when(s12 == 0) attack12_11 palt {
+         :0.5: {==}; 
+            l()
+         :0.5: {= s12 = 1 =}; 
+            l()
+         }
+      :: when(s12 == 0) attack12_22 palt {
+         :0.5: {= attacks = 1 =}; 
+            l()
+         :0.5: {= s12 = 1, attacks = 1 =}; 
+            l()
+         }
+      :: when(s12 == 2) attack22_12 {= attacks = 1 =};
+         l()
+      :: when(s12 == 2) clean_12 {= s12 = 0, clean = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process n22()
+{
+   process l()
+   {
+      alt {
+      :: when(s22 == 1) palt {
+         :0.5: {= s22 = 2 =}; 
+            l()
+         :0.5: {= s22 = 0 =}; 
+            l()
+         }
+      :: when(s22 == 2) {= s22 = 2 =};
+         l()
+      :: when(s22 == 2) attack12_22;
+         l()
+      :: when(s22 == 2) attack21_22;
+         l()
+      :: when(s22 == 0) attack22_12 palt {
+         :0.3: {==}; 
+            l()
+         :0.7: {= s22 = 1 =}; 
+            l()
+         }
+      :: when(s22 == 0) attack22_21 palt {
+         :0.3: {==}; 
+            l()
+         :0.7: {= s22 = 1 =}; 
+            l()
+         }
+      :: when(s22 == 2) clean_22 {= s22 = 0, clean = 1 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ attack11_12, attack11_21, attack12_11, attack12_22, attack21_11, attack21_22, attack22_12, attack22_21, clean_11, clean_12, clean_21, clean_22 } {
+:attack11_12, attack11_21, attack12_11, -, attack21_11, -, -, -, clean_11, -, -, -: n11()
+:-, attack11_21, -, -, attack21_11, attack21_22, -, attack22_21, -, -, clean_21, -: n21()
+:attack11_12, -, attack12_11, attack12_22, -, -, attack22_12, -, -, clean_12, -, -: n12()
+:-, -, -, attack12_22, -, attack21_22, attack22_12, attack22_21, -, -, -, clean_22: n22()
+}

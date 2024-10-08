@@ -35,3 +35,15 @@ class SegmentationFault(ModelError):
 
 class NullPointerException(ModelError):
     pass
+
+
+class UnsupportedProperty(ModelError):
+    pass
+
+
+class UnsupportedConversion(ModelError):
+    pass
+
+
+class UnknownError(ModelError):
+    pass

@@ -1,0 +1,199 @@
+﻿impatient action tick1;
+impatient action tick2;
+
+const int QMAX;
+
+transient real power = 0;
+transient real queue = 0;
+transient real lost = 0;
+int(0..1) c = 0;
+int(0..4) pm = 4;
+int(0..1) sr = 0;
+int(0..10) sp = 9;
+int(0..QMAX) q = 0;
+
+const real UNKNOWN;
+
+process timer()
+{
+   process l()
+   {
+      alt {
+      :: when(c == 0) tick1 {= c = 1 =};
+         l()
+      :: when(c == 1) tick2 {= c = 0, power = ((sp == 10 && c == 1 ? 2.5 : 0)) + ((sp == 1 && c == 1 ? 1.5 : 0)) + ((sp == 5 && c == 1 ? 2.5 : 0)) + ((sp == 8 && c == 1 ? 2.5 : 0)) + ((sp == 2 && c == 1 ? 2.5 : 0)) + ((sp == 7 && c == 1 ? 2.5 : 0)) + ((sp == 3 && c == 1 ? 0.8 : 0)) + ((sp == 9 && c == 1 ? 0.1 : 0)) + ((sp == 0 && c == 1 ? 2.5 : 0)) + ((sp == 6 && c == 1 ? 0.3 : 0)) + ((sp == 4 && c == 1 ? 2.5 : 0)), queue = (c == 1 ? q : 0), lost = (sr == 1 && sp > 0 && q == 2 ? 1 : 0) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process PM()
+{
+   process l()
+   {
+      alt {
+      :: tick1 {= pm = 0 =};
+         l()
+      :: tick1 {= pm = 1 =};
+         l()
+      :: tick1 {= pm = 2 =};
+         l()
+      :: tick1 {= pm = 3 =};
+         l()
+      :: tick1 {= pm = 4 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process SR()
+{
+   process l()
+   {
+      alt {
+      :: when(sr == 0) tick2 palt {
+         :0.898: {= sr = 0 =}; 
+            l()
+         :0.102: {= sr = 1 =}; 
+            l()
+         }
+      :: when(sr == 1) tick2 palt {
+         :0.454: {= sr = 0 =}; 
+            l()
+         :0.546: {= sr = 1 =}; 
+            l()
+         }
+      }
+   }
+
+   l()
+}
+
+process SP()
+{
+   process l()
+   {
+      alt {
+      :: when(sp == 3 && pm == 0) tick2 {= sp = 4 =};
+         l()
+      :: when(sp == 9 && pm == 4) tick2 {= sp = 9 =};
+         l()
+      :: when(sp == 3 && pm == 4) tick2 {= sp = 8 =};
+         l()
+      :: when(sp == 0 && pm == 4) tick2 {= sp = 8 =};
+         l()
+      :: when(sp == 6 && pm == 3) tick2 {= sp = 6 =};
+         l()
+      :: when(sp == 1 && pm == 3) tick2 {= sp = 5 =};
+         l()
+      :: when(sp == 9 && pm == 2) tick2 {= sp = 9 =};
+         l()
+      :: when(sp == 3 && pm == 2) tick2 {= sp = 3 =};
+         l()
+      :: when(sp == 0 && pm == 2) tick2 {= sp = 2 =};
+         l()
+      :: when(sp == 9 && pm == 1) tick2 {= sp = 9 =};
+         l()
+      :: when(sp == 6 && pm == 1) tick2 {= sp = 6 =};
+         l()
+      :: when(sp == 3 && pm == 1) tick2 {= sp = 3 =};
+         l()
+      :: when(sp == 1 && pm == 1) tick2 {= sp = 1 =};
+         l()
+      :: when(sp == 0 && pm == 1) tick2 {= sp = 1 =};
+         l()
+      :: when(sp == 9 && pm == 0) tick2 {= sp = 10 =};
+         l()
+      :: when(sp == 6 && pm == 0) tick2 {= sp = 7 =};
+         l()
+      :: when(sp == 2) tick2 palt {
+         :0.75: {= sp = 2 =}; 
+            l()
+         :0.25: {= sp = 3 =}; 
+            l()
+         }
+      :: when(sp == 1 && pm == 0) tick2 {= sp = 0 =};
+         l()
+      :: when(sp == 0 && pm == 0) tick2 {= sp = 0 =};
+         l()
+      :: when(sp == 10) tick2 palt {
+         :0.0017: {= sp = 0 =}; 
+            l()
+         :0.9983: {= sp = 10 =}; 
+            l()
+         }
+      :: when(sp == 8) tick2 palt {
+         :0.9983: {= sp = 8 =}; 
+            l()
+         :0.0017: {= sp = 9 =}; 
+            l()
+         }
+      :: when(sp == 7) tick2 palt {
+         :0.005: {= sp = 0 =}; 
+            l()
+         :0.995: {= sp = 7 =}; 
+            l()
+         }
+      :: when(sp == 5) tick2 palt {
+         :0.995: {= sp = 5 =}; 
+            l()
+         :0.005: {= sp = 6 =}; 
+            l()
+         }
+      :: when(sp == 4) tick2 palt {
+         :0.25: {= sp = 0 =}; 
+            l()
+         :0.75: {= sp = 4 =}; 
+            l()
+         }
+      :: when(sp == 1 && pm == 2) tick2 {= sp = 2 =};
+         l()
+      :: when(sp == 6 && pm == 2) tick2 {= sp = 6 =};
+         l()
+      :: when(sp == 0 && pm == 3) tick2 {= sp = 5 =};
+         l()
+      :: when(sp == 3 && pm == 3) tick2 {= sp = 5 =};
+         l()
+      :: when(sp == 9 && pm == 3) tick2 {= sp = 9 =};
+         l()
+      :: when(sp == 1 && pm == 4) tick2 {= sp = 8 =};
+         l()
+      :: when(sp == 6 && pm == 4) tick2 {= sp = 8 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process SQ()
+{
+   process l()
+   {
+      alt {
+      :: when(sr == 0 && sp == 0) tick2 {= q = max(q - 1, 0) =};
+         l()
+      :: when(sr == 1 && sp == 0) tick2 {= q = q =};
+         l()
+      :: when(sr == 0 && sp > 0) tick2 {= q = q =};
+         l()
+      :: when(sr == 1 && sp > 0) tick2 {= q = min(q + 1, QMAX) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ tick1, tick2 } {
+:tick1, tick2: timer()
+:tick1, -: PM()
+:-, tick2: SR()
+:-, tick2: SP()
+:-, tick2: SQ()
+}

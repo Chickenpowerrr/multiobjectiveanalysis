@@ -3,7 +3,7 @@ import subprocess
 from typing import List, Dict, Optional
 
 from error.error import StepboundUnsupported, ConvergeError, OnlyCumulativeSupported, StateRewardUnsupported, \
-    LongRunAverageUnsupported
+    LongRunAverageUnsupported, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -28,19 +28,19 @@ class Prism(Tool):
         raise ValueError(f"Unsupported method: {method}")
 
     def _vi_solve(self, model: Model, timeout: int, epsilon: float, absolute_epsilon: bool) -> bool | Optional[float]:
-        arguments = [self._path, model.file(),
-                     "-pf", model.property(),
+        arguments = [self._path, model.prism_file(),
+                     "-pf", model.prism_property(),
                      "-epsilon", str(epsilon), "-abs" if absolute_epsilon else "-rel",
                      "-paretoepsilon", str(epsilon),
                      "-maxiters", "1000000"]
-        if len(arguments) > 0:
+        if len(model.constants()) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
         result = subprocess.run(arguments, stdout=subprocess.PIPE, text=True, timeout=timeout)
         return self._parse_result(result.stdout)
 
     def _lp_solve(self, model: Model, timeout: int) -> bool | Optional[float]:
-        arguments = [self._path, model.file(), "-pf", model.property(), "-lp"]
+        arguments = [self._path, model.prism_file(), "-pf", model.prism_property(), "-lp"]
         if len(arguments) > 0:
             arguments.extend(["-const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
@@ -60,7 +60,8 @@ class Prism(Tool):
                 raise StateRewardUnsupported()
             if 'Steady-state reward properties cannot be used for MDPs' in message:
                 raise LongRunAverageUnsupported()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))

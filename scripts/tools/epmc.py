@@ -3,7 +3,7 @@ import re
 import subprocess
 from typing import List, Dict, Optional
 
-from error.error import NullPointerException
+from error.error import NullPointerException, UnknownError
 from model.model import Model
 from tools.tool import Tool, Method, Setting
 
@@ -32,16 +32,16 @@ class Epmc(Tool):
         if os.path.exists("epmc-prop.pctl"):
             os.remove("epmc-prop.pctl")
         with open("epmc-prop.pctl", 'w') as prop_file:
-            prop_file.write(model.property())
+            prop_file.write(model.prism_property())
 
         arguments = [self._java, '-jar', self._path, 'check',
-                     "--model-input-files", model.file(),
+                     "--model-input-files", model.prism_file(),
                      "--property-input-files", "epmc-prop.pctl",
                      "--graphsolver-iterative-stop-criterion", "absolute" if absolute_epsilon else "relative",
                      "--automaton-spot-ltl2tgba-cmd", self._spot,
                      "--graphsolver-iterative-tolerance", str(epsilon),
                      "--multi-objective-min-increase", str(epsilon)]
-        if len(arguments) > 0:
+        if len(model.constants()) > 0:
             arguments.extend(["--const", ",".join(f"{name}={value}" for name, value in model.constants().items())])
 
         result = subprocess.run(arguments, capture_output=True, text=True, timeout=timeout)
@@ -52,7 +52,8 @@ class Epmc(Tool):
         if value is None:
             if error_message is not None and 'java.lang.NullPointerException' in error_message:
                 raise NullPointerException()
-            raise Exception(message)
+            print(message)
+            raise UnknownError()
 
         try:
             return float(value.group(1))
@@ -60,6 +61,8 @@ class Epmc(Tool):
             if value.group(1) == 'true':
                 return True
             if value.group(1) == 'false':
+                return False
+            if 'Numerical multi-objective problem is infeasible' in message:
                 return False
             raise ValueError(message)
 

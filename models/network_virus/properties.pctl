@@ -1,2 +1,2 @@
-"LrLr": multi(R{"withvirus"}max=? [S], R{"clean"}>=0.15365860910999998 [S])
-"LrLr": multi(R{"withvirus"}>=3.5999997831 [S], R{"clean"}max=? [S])
+multi(R{"withvirus"}max=? [S], R{"clean"}>=0.15365860910999998 [S])
+multi(R{"withvirus"}>=3.5999997831 [S], R{"clean"}max=? [S])

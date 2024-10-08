@@ -34,7 +34,7 @@ class ActivityHandler(ABC):
     def start_query(self, tool: Tool, method: Method, model: Model):
         pass
 
-    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
+    def invalid_model(self, tool: Tool, model: Model, method: Method, error: ModelError):
         pass
 
     def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
@@ -89,9 +89,9 @@ class SubscribableActivityHandler(ActivityHandler):
         for activity_handler in self._activity_handlers:
             activity_handler.start_query(tool, method, model)
 
-    def invalid_model(self, tool: Tool, model: Model, error: ModelError):
+    def invalid_model(self, tool: Tool, model: Model, method: Method, error: ModelError):
         for activity_handler in self._activity_handlers:
-            activity_handler.invalid_model(tool, model, error)
+            activity_handler.invalid_model(tool, model, method, error)
 
     def handle_value_iteration_result(self, tool: Tool, model: Model, absolute_epsilon: bool,
                                       epsilons: List[float], approx_results: List[float], query_results: List[float]):

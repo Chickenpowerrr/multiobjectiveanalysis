@@ -11,17 +11,22 @@ def load_models():
 
     for model_dir_name in os.listdir(MODEL_PATH):
         model_dir = os.path.join(MODEL_PATH, model_dir_name)
-        model_file = os.path.join(model_dir, 'model.nm')
+        prism_model_file = os.path.join(model_dir, 'model.nm')
+        modest_model_file = os.path.join(model_dir, 'model.modest')
         properties_file = os.path.join(model_dir, 'properties.pctl')
         constants_file = os.path.join(model_dir, 'constants.txt')
+
+        if model_dir_name == 'team_formation':
+            print(f'Skipping: {model_dir_name}, missing entries...')
+            continue
 
         for pi, property in enumerate(parse_properties(properties_file)):
             constants = parse_constants(constants_file)
             if len(constants) == 0:
-                models.append(Model(f'{model_dir_name}-{pi}-0', model_file, property, {}))
+                models.append(Model(f'{model_dir_name}-{pi}-0', prism_model_file, modest_model_file, pi, property, {}))
                 continue
             for ci, constants in enumerate(constants):
-                models.append(Model(f'{model_dir_name}-{pi}-{ci}', model_file, property, constants))
+                models.append(Model(f'{model_dir_name}-{pi}-{ci}', prism_model_file, modest_model_file, pi, property, constants))
 
     return models
 

@@ -1,0 +1,146 @@
+﻿int(0..1) c = 0;
+int(0..6) b = 0;
+int(1..2) r = 1;
+transient bool one_trying = false;
+transient bool one_critical = false;
+transient real trying = 0;
+transient real critical = 0;
+int(0..2) p1 = 0;
+int(0..1) draw1 = 0;
+int(0..2) p2 = 0;
+int(0..1) draw2 = 0;
+int(0..2) p3 = 0;
+int(0..1) draw3 = 0;
+
+const real UNKNOWN;
+
+function int maxb(int maxb__param__b1, int maxb__param__b2, int maxb__param__b3) = max(max(maxb__param__b1, maxb__param__b2), maxb__param__b3);
+function int num_procs_in_crit(int num_procs_in_crit__param__p1, int num_procs_in_crit__param__p2, int num_procs_in_crit__param__p3) = ((num_procs_in_crit__param__p1 == 2 ? 1 : 0)) + ((num_procs_in_crit__param__p2 == 2 ? 1 : 0)) + ((num_procs_in_crit__param__p3 == 2 ? 1 : 0));
+function bool go(int go__param__draw2, int go__param__draw3) = go__param__draw2 == 0 && go__param__draw3 == 0;
+function bool draw(int draw__param__p1, int draw__param__b1, int draw__param__r1) = draw__param__p1 == 1 && (b < draw__param__b1 || r != draw__param__r1);
+process process1()
+{
+   int(0..6) b1 = 0;
+   int(0..2) r1 = 0;
+   
+   process l()
+   {
+      with(one_trying == (p1 == 1 || p2 == 1 || p3 == 1) && one_critical == (p1 == 2 || p2 == 2 || p3 == 2) && trying == ((p1 == 1 ? 1 : 0)) + ((p2 == 1 ? 1 : 0)) + ((p3 == 1 ? 1 : 0)) && critical == ((p1 == 2 ? 1 : 0)) + ((p2 == 2 ? 1 : 0)) + ((p3 == 2 ? 1 : 0))) alt {
+      :: when(go(draw2, draw3) && p1 == 0) {= p1 = 1 =};
+         l()
+      :: when(go(draw2, draw3) && draw(p1, b1, r1) && draw1 == 0) {= draw1 = 1 =};
+         l()
+      :: when(draw1 == 1) palt {
+         :0.5: {= b = max(b, 1), b1 = 1, r1 = r, draw1 = 0 =}; 
+            l()
+         :0.25: {= b = max(b, 2), b1 = 2, r1 = r, draw1 = 0 =}; 
+            l()
+         :0.125: {= b = max(b, 3), b1 = 3, r1 = r, draw1 = 0 =}; 
+            l()
+         :0.0625: {= b = max(b, 4), b1 = 4, r1 = r, draw1 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 5), b1 = 5, r1 = r, draw1 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 6), b1 = 6, r1 = r, draw1 = 0 =}; 
+            l()
+         }
+      :: when(c == 0 && p1 == 1 && b == b1 && r == r1 && go(draw2, draw3)) palt {
+         :0.5: {= c = 1, b = 0, r = 1, p1 = 2, b1 = 0, r1 = 0 =}; 
+            l()
+         :0.5: {= c = 1, b = 0, r = 2, p1 = 2, b1 = 0, r1 = 0 =}; 
+            l()
+         }
+      :: when(go(draw2, draw3) && p1 == 2) {= c = 0, p1 = 0 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process process2()
+{
+   int(0..6) b2 = 0;
+   int(0..2) r2 = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(go(draw1, draw3) && p2 == 0) {= p2 = 1 =};
+         l()
+      :: when(go(draw1, draw3) && draw(p2, b2, r2) && draw2 == 0) {= draw2 = 1 =};
+         l()
+      :: when(draw2 == 1) palt {
+         :0.5: {= b = max(b, 1), b2 = 1, r2 = r, draw2 = 0 =}; 
+            l()
+         :0.25: {= b = max(b, 2), b2 = 2, r2 = r, draw2 = 0 =}; 
+            l()
+         :0.125: {= b = max(b, 3), b2 = 3, r2 = r, draw2 = 0 =}; 
+            l()
+         :0.0625: {= b = max(b, 4), b2 = 4, r2 = r, draw2 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 5), b2 = 5, r2 = r, draw2 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 6), b2 = 6, r2 = r, draw2 = 0 =}; 
+            l()
+         }
+      :: when(c == 0 && p2 == 1 && b == b2 && r == r2 && go(draw1, draw3)) palt {
+         :0.5: {= c = 1, b = 0, r = 1, p2 = 2, b2 = 0, r2 = 0 =}; 
+            l()
+         :0.5: {= c = 1, b = 0, r = 2, p2 = 2, b2 = 0, r2 = 0 =}; 
+            l()
+         }
+      :: when(go(draw1, draw3) && p2 == 2) {= c = 0, p2 = 0 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process process3()
+{
+   int(0..6) b3 = 0;
+   int(0..2) r3 = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(go(draw2, draw1) && p3 == 0) {= p3 = 1 =};
+         l()
+      :: when(go(draw2, draw1) && draw(p3, b3, r3) && draw3 == 0) {= draw3 = 1 =};
+         l()
+      :: when(draw3 == 1) palt {
+         :0.5: {= b = max(b, 1), b3 = 1, r3 = r, draw3 = 0 =}; 
+            l()
+         :0.25: {= b = max(b, 2), b3 = 2, r3 = r, draw3 = 0 =}; 
+            l()
+         :0.125: {= b = max(b, 3), b3 = 3, r3 = r, draw3 = 0 =}; 
+            l()
+         :0.0625: {= b = max(b, 4), b3 = 4, r3 = r, draw3 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 5), b3 = 5, r3 = r, draw3 = 0 =}; 
+            l()
+         :0.03125: {= b = max(b, 6), b3 = 6, r3 = r, draw3 = 0 =}; 
+            l()
+         }
+      :: when(c == 0 && p3 == 1 && b == b3 && r == r3 && go(draw2, draw1)) palt {
+         :0.5: {= c = 1, b = 0, r = 1, p3 = 2, b3 = 0, r3 = 0 =}; 
+            l()
+         :0.5: {= c = 1, b = 0, r = 2, p3 = 2, b3 = 0, r3 = 0 =}; 
+            l()
+         }
+      :: when(go(draw2, draw1) && p3 == 2) {= c = 0, p3 = 0 =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+  } {
+:: process1()
+:: process2()
+:: process3()
+}

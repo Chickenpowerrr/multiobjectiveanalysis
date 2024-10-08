@@ -1,0 +1,151 @@
+﻿impatient action rec0;
+impatient action rec1;
+impatient action reset;
+impatient action send1;
+impatient action send2;
+impatient action time;
+
+const int M;
+const real UNKNOWN;
+property "Achievability0" = multi(Pe(<> (l == 4 && ip == 1)) >= UNKNOWN, Pe(<> (error != 0)) >= 0.19);
+property "Numerical0" = multi(Pmax(<> (l == 4 && ip == 1)), Pe(<> (error != 0)) >= 0.19);
+
+int(0..60) x = 0;
+int(0..10) y = 0;
+int(0..10) coll = 0;
+int(0..2) probes = 0;
+int(0..1) mess = 0;
+int(0..1) defend = 0;
+int(1..2) ip = 1;
+int(0..4) l = 1;
+
+process host0()
+{
+   process l()
+   {
+      alt {
+      :: when(l == 1 && coll == 10 && x == 60) palt {
+         :1 / 3 * (20 / 65024): {= x = 0, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (20 / 65024): {= x = 1, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (20 / 65024): {= x = 2, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 0, ip = 2, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 1, ip = 2, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 2, ip = 2, l = 2 =}; 
+            l()
+         }
+      :: when(l == 4) tau;
+         l()
+      :: when(l == 2 && x == 2 && probes == 2) {= x = 0, coll = 0, probes = 0, l = 3 =};
+         l()
+      :: when(l == 1 && coll < 10) palt {
+         :1 / 3 * (20 / 65024): {= x = 0, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (20 / 65024): {= x = 1, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (20 / 65024): {= x = 2, ip = 1, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 0, ip = 2, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 1, ip = 2, l = 2 =}; 
+            l()
+         :1 / 3 * (1 - 20 / 65024): {= x = 2, ip = 2, l = 2 =}; 
+            l()
+         }
+      :: when(l == 3 && mess == 0 && ip != 0) rec0 {= l = l =};
+         l()
+      :: when(l == 1) rec0;
+         l()
+      :: when(l == 2 && ip != 0) rec0 {= l = l =};
+         l()
+      :: when(l == 1) rec1;
+         l()
+      :: when((defend == 0 || y >= 10) && mess == 0 && ip == 1 && l == 3) rec1 {= y = 0, mess = 1, defend = 1 =};
+         l()
+      :: when((defend == 0 || y < 10) && mess == 0 && ip == 1 && l == 3) rec1 {= x = 0, y = 0, probes = 0, defend = 0, l = 0 =};
+         l()
+      :: when(l == 2 && ip == 1) rec1 {= x = 0, coll = min(coll + 1, 10), probes = 0, l = 0 =};
+         l()
+      :: when(l == 2 && ip != 1) rec1 {= l = l =};
+         l()
+      :: when(l == 3 && mess == 0 && ip != 1) rec1 {= l = l =};
+         l()
+      :: when(l == 0) reset {= l = 1 =};
+         l()
+      :: when(probes < 2 && ip == 1 && x == 2 && l == 2) send1 {= x = 0, probes = probes + 1 =};
+         l()
+      :: when(l == 3 && ip == 1 && mess == 1) send1 {= mess = 0 =};
+         l()
+      :: when(probes < 1 && ip == 1 && mess == 0 && x == 2 && l == 3) send1 {= x = 0, probes = probes + 1 =};
+         l()
+      :: when(probes == 1 && ip == 1 && mess == 0 && x == 2 && l == 3) send1 {= x = 0, y = 0, probes = 0, l = 4 =};
+         l()
+      :: when(probes < 2 && ip == 2 && x == 2 && l == 2) send2 {= x = 0, probes = probes + 1 =};
+         l()
+      :: when(l == 3 && ip == 2 && mess == 1) send2 {= mess = 0 =};
+         l()
+      :: when(probes < 1 && ip == 2 && mess == 0 && x == 2 && l == 3) send2 {= x = 0, probes = probes + 1 =};
+         l()
+      :: when(probes == 1 && ip == 2 && mess == 0 && x == 2 && l == 3) send2 {= x = 0, y = 0, probes = 0, l = 4 =};
+         l()
+      :: when(l == 1 && coll == 10 && x < 60) time {= x = min(x + 1, 60) =};
+         l()
+      :: when(l == 2 && x < 2) time {= x = min(x + 1, 2) =};
+         l()
+      :: when(x < 2 && mess == 0 && defend == 0 && l == 3) time {= x = min(x + 1, 60) =};
+         l()
+      :: when(x < 2 && mess == 0 && defend == 1 && l == 3) time {= x = min(x + 1, 60), y = min(y + 1, 10) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+int(0..1) env = 0;
+int(0..2) k = 0;
+int(0..M + 1) c1 = 0;
+int(0..M + 1) c2 = 0;
+int(0..1) error = 0;
+process env_error2()
+{
+   process l()
+   {
+      alt {
+      :: when(min(c1, c2) <= M && env == 0 && k > 0 && error == 0) rec1 {= env = 1 =};
+         l()
+      :: when(error == 1 || env == 1) rec1;
+         l()
+      :: when(error == 0 && env == 0) send1 {= k = min(k + 1, 2) =};
+         l()
+      :: when(error == 1 || env == 1) send1;
+         l()
+      :: when(error == 0 && env == 0) send2 {= env = 1 =};
+         l()
+      :: when(error == 1 || env == 1) send2;
+         l()
+      :: when(error == 0 && env == 0 && k == 0) time;
+         l()
+      :: when(min(c1, c2) < M && env == 0 && k == 1 && error == 0) time {= c1 = min(c1 + 1, M + 1) =};
+         l()
+      :: when(min(c1, c2) < M && env == 0 && k == 2 && error == 0) time {= c1 = min(c1 + 1, M + 1), c2 = min(c2 + 1, M + 1) =};
+         l()
+      :: when(error == 0 && env == 0 && min(c1, c2) == M) time {= error = 1 =};
+         l()
+      :: when(error == 1 || env == 1) time;
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ rec0, rec1, reset, send1, send2, time } {
+:rec0, rec1, reset, send1, send2, time: host0()
+:-, rec1, -, send1, send2, time: env_error2()
+}

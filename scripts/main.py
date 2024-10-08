@@ -11,12 +11,13 @@ from model.loader import load_models
 from output.activity import logger
 from output.progress import ProgressActivityHandler
 from output.writer import ResultActivityHandler
+from tools.modest import Modest
 from tools.epmc import Epmc
 from tools.prism import Prism
 from tools.storm import Storm
 from tools.tool import Tool, Method, Setting
 
-SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism, 'epmc': Epmc}
+SUPPORTED_TOOLS = {'storm': Storm, 'prism': Prism, 'epmc': Epmc, 'modest': Modest}
 
 
 def get_or_create_settings():
@@ -51,34 +52,40 @@ def run_experiments(models, tools, settings):
     min_epsilon = settings['analysis']['valueiteration']['epsilon']['min']
     max_epsilon = settings['analysis']['valueiteration']['epsilon']['max']
     epsilon_step = settings['analysis']['valueiteration']['epsilon']['step']
-    timeout = settings['analysis']['timeout']
+    vi_timeout = settings['analysis']['valueiteration']['timeout']
+    lp_timeout = settings['analysis']['linearprogramming']['timeout']
 
     for model in models:
         for tool in tools:
             for method in tool.supported_methods():
-                try:
-                    if method == Method.ValueIteration:
-                        epsilon_settings = []
-                        epsilon_settings += [True] if Setting.AbsoluteEpsilon in tool.supported_settings() else []
-                        epsilon_settings += [False] if Setting.RelativeEpsilon in tool.supported_settings() else []
+                if method == Method.ValueIteration:
+                    epsilon_settings = []
+                    epsilon_settings += [True] if Setting.AbsoluteEpsilon in tool.supported_settings() else []
+                    epsilon_settings += [False] if Setting.RelativeEpsilon in tool.supported_settings() else []
 
-                        for epsilon_setting in epsilon_settings:
+                    for epsilon_setting in epsilon_settings:
+                        try:
                             epsilons, approx_results, query_results = (
-                                analysis.run_value_iteration_analysis(tool, model, timeout,
+                                analysis.run_value_iteration_analysis(tool, model, vi_timeout,
                                                                       approx_infinity, approx_precision,
                                                                       min_epsilon, max_epsilon, epsilon_step,
                                                                       epsilon_setting))
                             logger.handle_value_iteration_result(tool, model, epsilon_setting,
                                                                  epsilons, approx_results, query_results)
-                    if method == Method.LinearProgramming:
+                        except TimeoutExpired:
+                            logger.invalid_model(tool, model, method, ConvergeError())
+                        except ModelError as error:
+                            logger.invalid_model(tool, model, method, error)
+                if method == Method.LinearProgramming:
+                    try:
                         approx_result, query_result = (
-                            analysis.run_linear_programming_analysis(tool, model, timeout,
+                            analysis.run_linear_programming_analysis(tool, model, lp_timeout,
                                                                      approx_infinity, approx_precision))
                         logger.handle_linear_program_result(tool, model, approx_result, query_result)
-                except TimeoutExpired:
-                    logger.invalid_model(tool, model, ConvergeError())
-                except ModelError as error:
-                    logger.invalid_model(tool, model, error)
+                    except TimeoutExpired:
+                        logger.invalid_model(tool, model, method, ConvergeError())
+                    except ModelError as error:
+                        logger.invalid_model(tool, model, method, error)
 
 
 if __name__ == '__main__':

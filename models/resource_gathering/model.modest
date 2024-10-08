@@ -1,0 +1,214 @@
+﻿impatient action down;
+impatient action left;
+impatient action right;
+impatient action top;
+
+const int B;
+const int CAP;
+const int M;
+const int Unf;
+
+transient real attacks = 0;
+transient real rew_gold = 0;
+transient real rew_gem = 0;
+int(0..CAP) gold = 0;
+int(0..CAP) gem = 0;
+int(1..5) x = 3;
+int(1..5) y = 1;
+bool attacked = false;
+int(0..1) av_gold = 1;
+int(0..1) av_gem = 1;
+
+const real UNKNOWN;
+property "Achievability0" = multi(Pe(<> (csteps >= 0 && cgold == 0)) >= UNKNOWN, Pe(<> (csteps >= 0 && cgem == 0)) >= 0.9);
+property "Numerical0" = multi(Pmax(<> (csteps >= 0 && cgold == 0)), Pe(<> (csteps >= 0 && cgem == 0)) >= 0.9);
+
+function bool can_carry_gem() = gem < CAP;
+function bool can_carry_gold() = gold < CAP;
+function bool right_of_enemy() = x == 5 && y == 5 || x == 4 && y == 4;
+function bool left_of_gold() = x == 2 && y == 5;
+function bool above_of_enemy() = x == 3 && y == 5;
+function bool right_of_gold() = x == 4 && y == 5;
+function bool left_of_home() = x == 2 && y == 1;
+function bool below_of_gold() = x == 3 && y == 4;
+function bool below_of_enemy() = x == 3 && y == 3 || x == 4 && y == 4;
+function bool above_of_gem() = x == 5 && y == 5;
+function bool below_of_gem() = x == 5 && y == 3;
+function bool below_of_home() = false;
+function bool left_of_enemy() = x == 3 && y == 5 || x == 2 && y == 4;
+function bool above_of_gold() = false;
+function bool right_of_gem() = false;
+function bool left_of_gem() = x == 4 && y == 4;
+function bool right_of_home() = x == 4 && y == 1;
+function bool above_of_home() = x == 3 && y == 2;
+process robot()
+{
+   process l()
+   {
+      with(attacks == ((attacked ? 1 : 0))) alt {
+      :: when(!above_of_enemy() && y > 1) down {= attacked = false, gold = (above_of_home() ? 0 : gold + ((above_of_gold() && can_carry_gold() ? av_gold : 0))), gem = (above_of_home() ? 0 : gem + ((above_of_gem() && can_carry_gem() ? av_gem : 0))), y = y - 1, rew_gold = (above_of_home() ? gold : 0), rew_gem = (above_of_home() ? gem : 0) =};
+         l()
+      :: when(above_of_enemy() && y > 1) down palt {
+         :1 / 10: {= attacked = true, gold = 0, gem = 0, x = 3, y = 1, rew_gold = (above_of_home() ? gold : 0), rew_gem = (above_of_home() ? gem : 0) =}; 
+            l()
+         :1 - 1 / 10: {= attacked = false, y = y - 1, rew_gold = (above_of_home() ? gold : 0), rew_gem = (above_of_home() ? gem : 0) =}; 
+            l()
+         }
+      :: when(!right_of_enemy() && x > 1) left {= attacked = false, gold = (right_of_home() ? 0 : gold + ((right_of_gold() && can_carry_gold() ? av_gold : 0))), gem = (right_of_home() ? 0 : gem + ((right_of_gem() && can_carry_gem() ? av_gem : 0))), x = x - 1, rew_gold = (right_of_home() ? gold : 0), rew_gem = (right_of_home() ? gem : 0) =};
+         l()
+      :: when(right_of_enemy() && x > 1) left palt {
+         :1 / 10: {= attacked = true, gold = 0, gem = 0, x = 3, y = 1, rew_gold = (right_of_home() ? gold : 0), rew_gem = (right_of_home() ? gem : 0) =}; 
+            l()
+         :1 - 1 / 10: {= attacked = false, x = x - 1, rew_gold = (right_of_home() ? gold : 0), rew_gem = (right_of_home() ? gem : 0) =}; 
+            l()
+         }
+      :: when(!left_of_enemy() && x < 5) right {= attacked = false, gold = (left_of_home() ? 0 : gold + ((left_of_gold() && can_carry_gold() ? av_gold : 0))), gem = (left_of_home() ? 0 : gem + ((left_of_gem() && can_carry_gem() ? av_gem : 0))), x = x + 1, rew_gold = (left_of_home() ? gold : 0), rew_gem = (left_of_home() ? gem : 0) =};
+         l()
+      :: when(left_of_enemy() && x < 5) right palt {
+         :1 / 10: {= attacked = true, gold = 0, gem = 0, x = 3, y = 1, rew_gold = (left_of_home() ? gold : 0), rew_gem = (left_of_home() ? gem : 0) =}; 
+            l()
+         :1 - 1 / 10: {= attacked = false, x = x + 1, rew_gold = (left_of_home() ? gold : 0), rew_gem = (left_of_home() ? gem : 0) =}; 
+            l()
+         }
+      :: when(!below_of_enemy() && y < 5) top {= attacked = false, gold = (below_of_home() ? 0 : gold + ((below_of_gold() && can_carry_gold() ? av_gold : 0))), gem = (below_of_home() ? 0 : gem + ((below_of_gem() && can_carry_gem() ? av_gem : 0))), y = y + 1, rew_gold = (below_of_home() ? gold : 0), rew_gem = (below_of_home() ? gem : 0) =};
+         l()
+      :: when(below_of_enemy() && y < 5) top palt {
+         :1 / 10: {= attacked = true, gold = 0, gem = 0, x = 3, y = 1, rew_gold = (below_of_home() ? gold : 0), rew_gem = (below_of_home() ? gem : 0) =}; 
+            l()
+         :1 - 1 / 10: {= attacked = false, y = y + 1, rew_gold = (below_of_home() ? gold : 0), rew_gem = (below_of_home() ? gem : 0) =}; 
+            l()
+         }
+      }
+   }
+
+   l()
+}
+
+process goldtile()
+{
+   int(0..M) t_gold = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(above_of_gold() && av_gold > 0) down {= av_gold = 0, t_gold = M =};
+         l()
+      :: when(!above_of_gold() || av_gold == 0) down {= av_gold = (t_gold <= 1 ? 1 : 0), t_gold = max(t_gold - 1, 0) =};
+         l()
+      :: when(right_of_gold() && av_gold > 0) left {= av_gold = 0, t_gold = M =};
+         l()
+      :: when(!right_of_gold() || av_gold == 0) left {= av_gold = (t_gold <= 1 ? 1 : 0), t_gold = max(t_gold - 1, 0) =};
+         l()
+      :: when(left_of_gold() && av_gold > 0) right {= av_gold = 0, t_gold = M =};
+         l()
+      :: when(!left_of_gold() || av_gold == 0) right {= av_gold = (t_gold <= 1 ? 1 : 0), t_gold = max(t_gold - 1, 0) =};
+         l()
+      :: when(below_of_gold() && av_gold > 0) top {= av_gold = 0, t_gold = M =};
+         l()
+      :: when(!below_of_gold() || av_gold == 0) top {= av_gold = (t_gold <= 1 ? 1 : 0), t_gold = max(t_gold - 1, 0) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+process gemtile()
+{
+   int(0..M) t_gem = 0;
+   
+   process l()
+   {
+      alt {
+      :: when(above_of_gem() && av_gem > 0) down {= av_gem = 0, t_gem = M =};
+         l()
+      :: when(!above_of_gem() || av_gem == 0) down {= av_gem = (t_gem <= 1 ? 1 : 0), t_gem = max(t_gem - 1, 0) =};
+         l()
+      :: when(right_of_gem() && av_gem > 0) left {= av_gem = 0, t_gem = M =};
+         l()
+      :: when(!right_of_gem() || av_gem == 0) left {= av_gem = (t_gem <= 1 ? 1 : 0), t_gem = max(t_gem - 1, 0) =};
+         l()
+      :: when(left_of_gem() && av_gem > 0) right {= av_gem = 0, t_gem = M =};
+         l()
+      :: when(!left_of_gem() || av_gem == 0) right {= av_gem = (t_gem <= 1 ? 1 : 0), t_gem = max(t_gem - 1, 0) =};
+         l()
+      :: when(below_of_gem() && av_gem > 0) top {= av_gem = 0, t_gem = M =};
+         l()
+      :: when(!below_of_gem() || av_gem == 0) top {= av_gem = (t_gem <= 1 ? 1 : 0), t_gem = max(t_gem - 1, 0) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+int(0..B * Unf + 1) cgold = B * Unf;
+process goldcounter()
+{
+   process l()
+   {
+      alt {
+      :: down {= cgold = max(0, cgold - ((above_of_home() ? gold : 0))) =};
+         l()
+      :: left {= cgold = max(0, cgold - ((right_of_home() ? gold : 0))) =};
+         l()
+      :: right {= cgold = max(0, cgold - ((left_of_home() ? gold : 0))) =};
+         l()
+      :: top {= cgold = max(0, cgold - ((below_of_home() ? gold : 0))) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+int(0..ceil(B / 2) * Unf + 1) cgem = ceil(B / 2) * Unf;
+process gemcounter()
+{
+   process l()
+   {
+      alt {
+      :: down {= cgem = max(0, cgem - ((above_of_home() ? gem : 0))) =};
+         l()
+      :: left {= cgem = max(0, cgem - ((right_of_home() ? gem : 0))) =};
+         l()
+      :: right {= cgem = max(0, cgem - ((left_of_home() ? gem : 0))) =};
+         l()
+      :: top {= cgem = max(0, cgem - ((below_of_home() ? gem : 0))) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+int(-1..((Unf == 0 ? -1 : B * 11)) + 1) csteps = (Unf == 0 ? -1 : B * 11);
+process stepcounter()
+{
+   
+   process l()
+   {
+      alt {
+      :: down {= csteps = max(-1, csteps - 1) =};
+         l()
+      :: left {= csteps = max(-1, csteps - 1) =};
+         l()
+      :: right {= csteps = max(-1, csteps - 1) =};
+         l()
+      :: top {= csteps = max(-1, csteps - 1) =};
+         l()
+      }
+   }
+
+   l()
+}
+
+par {
+ down, left, right, top } {
+:down, left, right, top: robot()
+:down, left, right, top: goldtile()
+:down, left, right, top: gemtile()
+:down, left, right, top: goldcounter()
+:down, left, right, top: gemcounter()
+:down, left, right, top: stepcounter()
+}
