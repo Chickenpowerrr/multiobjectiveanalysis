@@ -9,7 +9,6 @@ impatient action wait_delay;
 const int Unf;
 const int B;
 
-transient bool timeExceeded = false;
 transient real time = 0;
 transient real interaction = 0;
 int(0..2) n_water = 0;
@@ -40,7 +39,7 @@ process robot()
    
    process l()
    {
-      with(timeExceeded == (t == 0)) alt {
+      alt {
       :: when(l == 7 && wants_water7 == 0) check_water palt {
          :2 / 10: {= wants_water7 = 1, time = 10 =}; 
             l()

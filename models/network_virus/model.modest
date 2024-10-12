@@ -13,7 +13,6 @@ impatient action clean_22;
 
 transient real attacks = 0;
 transient real clean = 0;
-transient real withvirus = 0;
 int(0..2) s11 = 2;
 int(0..2) s21 = 2;
 int(0..2) s12 = 2;
@@ -25,7 +24,7 @@ process n11()
 {
    process l()
    {
-      with(withvirus == ((s22 == 2 ? 1 : 0)) + ((s12 == 2 ? 1 : 0)) + ((s21 == 2 ? 1 : 0)) + ((s11 == 2 ? 1 : 0))) alt {
+      alt {
       :: when(s11 == 1) palt {
          :0.5: {= s11 = 2 =}; 
             l()

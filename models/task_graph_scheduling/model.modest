@@ -8,7 +8,6 @@ impatient action time;
 
 const int K;
 
-transient bool tasks_complete = false;
 transient real time = 0;
 transient real energy = 0;
 int(0..3) task6 = 0;
@@ -29,7 +28,7 @@ process scheduler()
    
    process l()
    {
-      with(tasks_complete == (task6 == 3)) alt {
+      alt {
       :: when(task1 == 0) p1_add {= task1 = 1 =};
          l()
       :: when(task4 == 0 && task1 == 3 && task2 == 3) p1_add {= task4 = 1 =};

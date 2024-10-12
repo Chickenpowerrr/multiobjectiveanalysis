@@ -1,10 +1,6 @@
 ﻿int(0..1) c = 0;
 int(0..6) b = 0;
 int(1..2) r = 1;
-transient bool one_trying = false;
-transient bool one_critical = false;
-transient real trying = 0;
-transient real critical = 0;
 int(0..2) p1 = 0;
 int(0..1) draw1 = 0;
 int(0..2) p2 = 0;
@@ -25,7 +21,7 @@ process process1()
    
    process l()
    {
-      with(one_trying == (p1 == 1 || p2 == 1 || p3 == 1) && one_critical == (p1 == 2 || p2 == 2 || p3 == 2) && trying == ((p1 == 1 ? 1 : 0)) + ((p2 == 1 ? 1 : 0)) + ((p3 == 1 ? 1 : 0)) && critical == ((p1 == 2 ? 1 : 0)) + ((p2 == 2 ? 1 : 0)) + ((p3 == 2 ? 1 : 0))) alt {
+      alt {
       :: when(go(draw2, draw3) && p1 == 0) {= p1 = 1 =};
          l()
       :: when(go(draw2, draw3) && draw(p1, b1, r1) && draw1 == 0) {= draw1 = 1 =};

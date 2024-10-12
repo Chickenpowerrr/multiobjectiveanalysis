@@ -64,7 +64,7 @@ def _run_approximation(tool: Tool, method: Method, model: Model, timeout: int, p
     best_bound_result = tool.solve(method, best_bound_model, timeout, parameters)
 
     if best_bound_result:
-        return math.inf if maximize else 0
+        return (1 if model.probability() else math.inf) if maximize else 0
 
     worst_model = model.set_value(0 if maximize else high)
     worst_bound_result = tool.solve(method, worst_model, timeout, parameters)

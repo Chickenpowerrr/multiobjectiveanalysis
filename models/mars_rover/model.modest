@@ -8,9 +8,6 @@ impatient action task_done;
 const int Unf;
 const int B;
 
-transient bool valueCollected = false;
-transient bool exceedTime = false;
-transient bool exceedEnergy = false;
 transient real value = 0;
 transient real time = 0;
 transient real energy = 0;
@@ -22,8 +19,8 @@ int(0..((Unf >= 2 ? B * 9 + 1 : 0)) + 1) counter_time = (Unf >= 2 ? B * 9 + 1 : 
 int(0..((Unf >= 2 ? B * 5 + 1 : 0)) + 1) counter_energy = (Unf >= 2 ? B * 5 + 1 : 0);
 
 const real UNKNOWN;
-property "Achievability0" = multi(Pe(<> (!exceedTime && !exceedEnergy && done)) >= UNKNOWN, Pe(<> valueCollected) >= 0.9);
-property "Numerical0" = multi(Pmax(<> (!exceedTime && !exceedEnergy && done)), Pe(<> valueCollected) >= 0.9);
+property "Achievability0" = multi(Pe(<> (!(counter_time == 0) && !(counter_energy == 0) && done)) >= UNKNOWN, Pe(<> (counter_value == 0)) >= 0.9);
+property "Numerical0" = multi(Pmax(<> (!(counter_time == 0) && !(counter_energy == 0) && done)), Pe(<> (counter_value == 0)) >= 0.9);
 property "Achievability1" = multi(Xe(S(time), true) <= UNKNOWN, Xe(S(energy), true) <= 43.99999993400001);
 property "Numerical1" = multi(Xmin(S(time), true), Xe(S(energy), true) <= 43.99999993400001);
 
@@ -42,7 +39,7 @@ process rover()
 {
    process l()
    {
-      with(valueCollected == (counter_value == 0) && exceedTime == (counter_time == 0) && exceedEnergy == (counter_energy == 0)) alt {
+      alt {
       :: when(Unf != 1 && task == 0) rover_done {= done = true =};
          l()
       :: when(task == 0 && !done) task1_start palt {

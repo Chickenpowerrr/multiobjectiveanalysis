@@ -8,7 +8,6 @@ const int CAP;
 const int M;
 const int Unf;
 
-transient real attacks = 0;
 transient real rew_gold = 0;
 transient real rew_gem = 0;
 int(0..CAP) gold = 0;
@@ -45,7 +44,7 @@ process robot()
 {
    process l()
    {
-      with(attacks == ((attacked ? 1 : 0))) alt {
+      alt {
       :: when(!above_of_enemy() && y > 1) down {= attacked = false, gold = (above_of_home() ? 0 : gold + ((above_of_gold() && can_carry_gold() ? av_gold : 0))), gem = (above_of_home() ? 0 : gem + ((above_of_gem() && can_carry_gem() ? av_gem : 0))), y = y - 1, rew_gold = (above_of_home() ? gold : 0), rew_gem = (above_of_home() ? gem : 0) =};
          l()
       :: when(above_of_enemy() && y > 1) down palt {
